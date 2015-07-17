@@ -1,0 +1,255 @@
+JuicyJS Api Reference
+
+In sweet TXT form!
+
+Classes:
+  Game
+  Input
+  State
+  Text
+  Entity
+  Component
+
+Global Components:
+   Transform
+   Image
+   Box
+
+Static methods:
+   rand(min, max)
+      Return a random float between min and max
+      > min [number] : minimum value
+      > max [number] : maximum value (non-inclusive)
+      < random float in the range [min, max)
+
+-----------------------------
+
+Game:
+   new Juicy.Game(canvas, width, height)
+      Initialize a new Game
+      > canvas [DOM] : DOM element of the canvas for this game
+      > width [number] : width of the game
+      > height [number] : height of the game
+
+Static methods:
+   Game.extend(properties, static_properties)
+      Return a modified Game object, with properties possibly overriden
+      > properties [object] : member functions of the new Game object
+      > static_properties [object] : static functions of the new Game object
+      < modified Juicy.Game constructor
+
+Member functions:
+   setInput(input)
+      Attach an input handler to this game
+      > input [Juicy.Input] : object that will handle input
+      < chain
+
+   setCanvas(canvas)
+      Set the canvas that this game sits on
+      > canvas [DOM] : DOM canvas element
+      < chain
+
+   resize()
+      Resize the canvas to maintain proper aspect ratio
+      < chain
+
+   setState(state)
+      Set the current running state for this game
+      > state [Juicy.State] : state to register
+      < chain
+
+   click(x, y)
+      React to a click on the canvas
+      > x [number] : x position of click in game
+      > y [number] : y position of click in game
+      < chain
+
+   run()
+      Begin the game's update loop
+      < chain
+
+   pause()
+      Pause the game and kill its update loop. You must use run() to start it again
+      < chain
+
+-----------------------------
+
+Input:
+   new Juicy.Input(document, keys, controls)
+      Initialize a new Game
+      > document [document] : HTML5 document to attach events to
+      > keys [object] : Association from control name to keyCode
+      > controls [any] : Totally useless. 100%
+
+Static methods:
+   Input.extend(properties, static_properties)
+      Return a modified Input object, with properties possibly overriden
+      > properties [object] : member functions of the new Input object
+      > static_properties [object] : static functions of the new Input object
+      < modified Juicy.Input constructor
+
+Member functions:
+   setKeys(keys)
+      Change the key bindings
+      > keys [object] : Association from control name to keyCode
+      < chain
+
+   keyDown(key)
+      Determine whether a specific key is down
+      > key [string|number] : key name or key code
+      < boolean
+
+   init(document)
+      Called during construction. Attach events to DOM
+      > document [document] : where to attach the elements
+      < chain
+
+   on(action, keys, callback)
+      Attach a callback to certain event
+      > action [string] : type of event (usually 'key')
+      > keys [string|array of strings|callback] : key names to attach to this callback OR callback (if action is not 'key') 
+
+-----------------------------
+
+State:
+   new Juicy.State()
+      Initialize a new game state.
+   new Juicy.Scene()
+      Initialize a new game state.
+   new Juicy.Screen()
+      Initialize a new game state.
+
+Static methods:
+   State.extend(properties, static_properties)
+      Return a modified State object, with properties possibly overriden
+      > properties [object] : member functions of the new State object
+      > static_properties [object] : static functions of the new State object
+      < modified Juicy.State constructor
+
+Extendable member functions:
+   init()
+      Called when the scene is activated.
+      At this point, the state has a reference to its Game Object
+
+   click(x, y)
+      React to a click in the game
+      > x [number] : x position of click in game
+      > y [number] : y position of click in game
+
+   update(dt, input)
+      Update the state, called once per virtual frame
+      > dt [number] : Time, in seconds, since last frame
+      > input [Juicy.Input] : Input object with information about player input
+
+   render(context)
+      Render objects to the screen
+      > context [CanvasRenderingContext2D] : Context to which state should be rendered
+
+-----------------------------
+
+Text:
+   new Juicy.Text([text, [font, [fillStyle, [alignment]]]])
+      Initialize a new text object
+      > text [string] : text to draw
+      > font [string] : font to write the text in
+      > fillStyle [string] : color to draw the text
+      > alignment [string] : left, center, or right
+
+Member functions:
+   set(config)
+      Set the text, font, or fillStyle for this text
+      > config [object] : object with properties to set
+      < chain
+
+   align(alignment)
+      Set the alignment for this text
+      > alignment [string] : left, center, or right
+
+   render()
+      Re-render the text to its buffer. Not usually called.
+      < chain
+
+   draw(context, [sx, sy, swidth, sheight,] dx, dy, [dwidth, dheight])
+      Draw the text onto a 2d context
+      > context [CanvasRenderingContext2D] : Context to which text should be rendered
+      > sx [number] : source x value (from context.drawImage)
+      > sy [number] : source y value (from context.drawImage)
+      > swidth [number] : source width (from context.drawImage)
+      > sheight [number] : source height (from context.drawImage)
+      > dx [number] : dest x value (from context.drawImage)
+      > dy [number] : dest y value (from context.drawImage)
+      > dwidth [number] : dest width (from context.drawImage)
+      > dheight [number] : dest height (from context.drawImage)
+
+-----------------------------
+
+Entity:
+   new Juicy.Entity(state, components)
+      Initialize a new entity
+      > state [Juicy.State] : state to which entity should be attached
+      > components [array of {string | Juicy.Component}] : components to initialize on the Entity
+
+Static methods:
+   Entity.extend(properties, static_properties)
+      Return a modified Entity object, with properties possibly overriden
+      > properties : member functions of the new Entity object
+      > static_properties : static functions of the new Entity object
+      < Modified Juicy.Entity constructor
+
+Member functions:
+   getComponent(name)
+      Return a component, if it exists, attached to the Entity
+      > name [string] : Name the component is registered under
+      < Juicy.Component object or undefined
+
+   addComponent(component)
+      Add a component to this entity
+      > component [string|Juicy.Component|Constructor] : component to add
+
+   update(dt)
+      Update all of this Entity's components
+      > dt [number] : time since last frame
+
+   render(context)
+      Render an entity to the screen
+      > context [CanvasRenderingContext2D] : Context to which entity should be rendered
+
+Extendable member functions:
+   init()
+      Called once the Entity's components have been initialized, so that you can mess with them at will.
+
+-----------------------------
+
+Component:
+   new Juicy.Component(entity)
+      Initialize a new game state.
+      > entity [Juicy.Entity] : Entity this component belongs to
+
+Static methods:
+   Component.create(name, properties, static_properties)
+      Create a new Component and register it in the Juicy namespace
+      > name : name to register the new component as
+      > properties : member functions of the new Component object
+      > static_properties : static functions of the new Component object
+
+   Component.extend(properties, static_properties)
+      Return a modified Component object, with properties possibly overriden
+      > properties : member functions of the new Component object
+      > static_properties : static functions of the new Component object
+
+Extendable member functions:
+   update(dt, input)
+      Update this component
+      > dt [number] : time since last frame
+      > input [Juicy.Input] : input handler for the game
+
+   render(context)
+      Render this component to the screen
+      > context [CanvasRenderingContext2D] : Context to which entity should be rendered
+
+-----------------------------
+
+Global Components
+   Box: Draws a rectangular bounding box around an Entity
+   Image: Draws a rectangular image
+   Transform: Maintains the position and size of the Entity. Created for every Entity

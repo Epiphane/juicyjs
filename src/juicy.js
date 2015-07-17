@@ -207,6 +207,7 @@
     *    render (context)   - Run after  update.    Use for graphics
     */
    var Scene = Juicy.Scene   = function() { this.entities = []; };
+   Juicy.State = Juicy.Screen= Juicy.Scene;
    Scene.prototype.init      = function() {};
    Scene.prototype.click     = function(x, y) {};
    Scene.prototype.onKey     = {};
