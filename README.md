@@ -113,7 +113,7 @@ var myText = new Juicy.Text(text, font, color, alignment);
 
 var example = new Juicy.Text('This is an example!', '40pt Arial', 'white', 'center');
 
-example.draw(context, game_width / 2, 0); // Draw in the center of the screen
+example.render(context, game_width / 2, 0); // Draw in the center of the screen
 ```
 
 ### Entity
