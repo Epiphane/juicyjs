@@ -114,6 +114,7 @@ var GameScreen = Juicy.Scene.extend({
       // Check every frame to see whether UP is pressed
       // 'UP' is defined in main.js, when the input is created.
       // This is good for continuous things, such as movement.
+      // console.log(input.keyDown('UP'));
       if (input.keyDown('UP')) {
          this.lastButton = '^';
          this.updated = true;
@@ -158,8 +159,8 @@ var GameScreen = Juicy.Scene.extend({
 
    
       // Draw our text
-      this.title.draw(context, this.game.width / 2, 100);
-      this.sub.draw(context, 200, 160);
+      this.title.render(context, this.game.width / 2, 100);
+      this.sub.render(context, 200, 160);
 
 
       // Draw another dude.

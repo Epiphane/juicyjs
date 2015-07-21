@@ -32,6 +32,6 @@ Juicy.Component.create('Custom', {
 
    // Called automatically when you call Entity.render();
    render: function(context) {
-      this.counter.draw(context, 0, 0);
+      this.counter.render(context, 0, 0);
    }
 })

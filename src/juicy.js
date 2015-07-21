@@ -11,16 +11,14 @@
 })(this, function() {
    /* -------------------- Animation frames ----------------- */
    window = window || {};
-   var requestAnimationFrame = (function() {
-      return  window.requestAnimationFrame  || 
-         window.webkitRequestAnimationFrame || 
-         window.mozRequestAnimationFrame    || 
-         window.oRequestAnimationFrame      || 
-         window.msRequestAnimationFrame     || 
-         function(/* function */ callback, /* DOMElement */ element){
+   window.requestAnimFrame = (function() {
+      return window.requestAnimationFrame ||
+         window.webkitRequestAnimationFrame ||
+         window.mozRequestAnimationFrame    ||
+         function(callback) {
             window.setTimeout(callback, 1000 / 60);
          };
-   })();
+      })();
 
    /* Base object */
    var Juicy = {};
@@ -35,6 +33,8 @@
       else
          return Math.floor(Math.random() * min);
    };
+
+   Juicy.PI = 3.1415926535;
 
    /* -------------------- Game Handler --------------------- */
    /* 
@@ -72,8 +72,8 @@
 
    Game.prototype.getCanvasCoords = function(evt) {
       var canvasRect = this.canvas.getBoundingClientRect();
-      var mx = evt.x || evt.clientX - canvasRect.left;
-      var my = evt.y || evt.clientY - canvasRect.top;
+      var mx = (evt.x || evt.clientX) - canvasRect.left;
+      var my = (evt.y || evt.clientY) - canvasRect.top;
 
       return {
          x: Math.floor(mx * this.width /  this.canvas.width), 
@@ -101,10 +101,15 @@
 
    Game.prototype.resize = function() {
       var parent = this.canvas.parentElement;
-      var width  = parent.width || parent.clientWidth;
+      var width  = parent.width  || parent.clientWidth;
+      var height = parent.height || parent.clientHeight;
 
       this.canvas.width  = width;
       this.canvas.height = width * this.height / this.width;
+      if (this.canvas.height > height) {
+         this.canvas.height = height;
+         this.canvas.width = height * this.width / this.height;
+      }
       this.scale = {
          x: this.canvas.width  / this.width,
          y: this.canvas.height / this.height
@@ -118,6 +123,8 @@
    };
 
    Game.prototype.setState = function(state) {
+      this.input.clear();
+
       this.state = state;
       this.state.game = this;
       this.state.init();
@@ -136,25 +143,32 @@
          return;
 
       var self = this;
-      requestAnimationFrame(function() {
+      window.requestAnimFrame(function() {
          self.update();
       });
       var nextTime = new Date().getTime();
       var updated  = false;
       var dt = (nextTime - this.lastTime) / 1000;
-      // Limit to 60 FPS
-      if (dt < 1 / 60)
-         return;
-
-      if (this.state) {
-         updated = !this.state.update(dt, this.input) || this.state.updated;
-         this.state.updated = false;
+      if (dt > 0.2) {
+        this.lastTime = nextTime;
+        return;
       }
-      this.lastTime = nextTime;
 
-      if (updated || !this.state.__hasRendered) {
-         this.render();
-         this.state.__hasRendered = true;
+      try {
+         if (this.state) {
+            updated = !this.state.update(dt, this.input) || this.state.updated;
+            this.state.updated = false;
+         }
+         this.lastTime = nextTime;
+
+         if (updated || !this.state.__hasRendered) {
+            this.render();
+            this.state.__hasRendered = true;
+         }
+      }
+      catch (e) {
+         console.error(e);
+         this.running = false;
       }
    };
 
@@ -195,24 +209,24 @@
       this.running = false;
    };
 
-   /* -------------------- Game Scene ----------------------- */
+   /* -------------------- Game State ----------------------- */
    /* 
-    * new Scene() - Construct new scene
+    * new State() - Construct new state
     *  [Constructor]
-    *    init   ()          - Run every time the scene is swapped to.
+    *    init   ()          - Run every time the state is swapped to.
     *  [Useful]
-    *    click  (evt)       - When the user clicks the scene
+    *    click  (evt)       - When the user clicks the state
     *    update (dt, input) - Run before rendering. Use for logic.
     *                         IMPORTANT: return true if you don't want to re-render
     *    render (context)   - Run after  update.    Use for graphics
     */
-   var Scene = Juicy.Scene   = function() { this.entities = []; };
-   Juicy.State = Juicy.Screen= Juicy.Scene;
-   Scene.prototype.init      = function() {};
-   Scene.prototype.click     = function(x, y) {};
-   Scene.prototype.onKey     = {};
-   Scene.prototype.update    = function(dt, input) {};
-   Scene.prototype.render    = function(context) {};
+   var State = Juicy.State    = function() { this.entities = []; };
+   Juicy.Scene = Juicy.Screen = Juicy.State;
+   State.prototype.init       = function() {};
+   State.prototype.click      = function(x, y) {};
+   State.prototype.onKey      = {};
+   State.prototype.update     = function(dt, input) {};
+   State.prototype.render     = function(context) {};
 
    /* -------------------- Game Entity ----------------------- */
    /* 
@@ -227,10 +241,10 @@
     *    render (context) - Calls render on all components
     */
    var untitledComponents = 0;
-   var Entity = Juicy.Entity = function(scene, components) {
+   var Entity = Juicy.Entity = function(state, components) {
       this.components = {};
       this.updated    = {};
-      this.scene      = scene;
+      this.state      = state;
 
       var components = components || this.__proto__.components;
       if (components.indexOf('Transform') >= 0)
@@ -271,6 +285,10 @@
       }
    };
    Entity.prototype.getComponent = function(name) {
+      if (!this.components[name]) {
+         return null;
+      }
+
       if (this.dt) {
          if (this.updated[name] === 1)
             throw 'Circular component dependency: ' + name + '<>';
@@ -283,7 +301,7 @@
    Entity.prototype.update = function(dt, name) {
       if (name) {
          this.updated[name] = 1;
-         this.components[name].update(dt, this.input);
+         this.components[name].update(dt, this.state.game.input);
          this.updated[name] = 2;
       }
       else { // Update all
@@ -366,6 +384,7 @@
       this.CONTROLS = controls;
       this.keyState = {};
       this.keyCallbacks = {};
+      this.eventListeners = {};
 
       // Reverse of KEYS
       this.CODES = {};
@@ -376,6 +395,18 @@
       this.init(document);
 
       return this; // Enable chaining
+   };
+
+   Input.prototype.clear = function() {
+      this.keyCallbacks = {};
+
+      for (var action in this.eventListeners) {
+         var listeners = this.eventListeners[action];
+         while (listeners.length > 0) {
+            this.document.removeEventListener(action, listeners.shift());
+         }
+      }
+      this.eventListeners = {};
    };
 
    Input.prototype.setKeys = function(keys) {
@@ -408,17 +439,17 @@
       this.onkey = [];
 
       var self = this;
-      this.on('keydown', function(evt) {
+      document.onkeydown = function(evt) {
          self.keyState[evt.keyCode] = true;
-      });
-      this.on('keyup', function(evt) {
+      };
+      document.onkeyup = function(evt) {
          self.keyState[evt.keyCode] = false;
 
          var cb = self.keyCallbacks[evt.keyCode];
          for(var i in cb) {
             cb[i](self.CODES[evt.keyCode]);
          }
-      });
+      };
 
       return this; // Enable chaining
    };
@@ -440,6 +471,9 @@
       }
       else {
          this.document.addEventListener(action, keys);
+
+         this.eventListeners[action] = this.eventListeners[action] || [];
+         this.eventListeners[action].push(keys);
       }
 
       return this; // Enable chaining
@@ -486,7 +520,7 @@
       return child;
    };
 
-   Game.extend = Scene.extend = Entity.extend = Component.extend = extend;
+   Game.extend = State.extend = Entity.extend = Component.extend = extend;
    Input.extend = extend;
 
    /* -------------------- Typical Components --------------- */
@@ -494,25 +528,73 @@
       constructor: function(entity) {
          var self = this;
 
+         this._tint = false;
+         this.opacity = 1;
+
          this.image = new Image();
          this.image.onload = function() {
-            entity.transform.width  = this.width;
-            entity.transform.height = this.height;
+            if (!entity.transform.width && !entity.transform.height) {
+               entity.transform.width  = this.width;
+               entity.transform.height = this.height;
+            }
 
-            if (self.onload)
+            entity.state.updated = true;
+
+            if (self._tint) {
+               self.setTint(self._tint);
+            }
+
+            if (self.onload) {
                self.onload(this);
+            }
          }
 
          entity.setImage = this.setImage.bind(this);
       },
-      setImage: function(url) {
+      setTint: function(tint) {
+         // TODO glean alpha of tint
+         this._tint = tint;
+
+         if (this.image.complete) {
+            // Apply tint
+            if (!this.overlay) {
+               this.overlay = document.createElement('canvas');
+            }
+
+            this.overlay.width = this.image.width;
+            this.overlay.height = this.image.height;
+
+            var context = this.overlay.getContext('2d');
+
+            context.fillStyle = this._tint;
+            context.fillRect(0, 0, this.overlay.width, this.overlay.height);
+
+            // destination atop makes a result with an alpha channel identical to fg,
+            // but with all pixels retaining their original color *as far as I can tell*
+            context.globalCompositeOperation = "destination-atop";
+            context.globalAlpha = 0.75;
+            context.drawImage(this.image, 0, 0);
+            context.globalAlpha = 1;
+         }
+      },
+      setImage: function(url, tint) {
          this.image.src = url;
+
+         this.tint = tint || this.tint
 
          return this;
       },
-      render: function(context) {
+      render: function(context, sx, sy, swidth, sheight, dx, dy, dwidth, dheight) {
+         var originalAlpha   = context.globalAlpha;
+         context.globalAlpha = this.opacity;
          arguments[0] = this.image;
          context.drawImage.apply(context, arguments);
+
+         if (this._tint) {
+            arguments[0] = this.overlay;
+            context.drawImage.apply(context, arguments);
+         }
+         context.globalAlpha = originalAlpha;
       }
    });
 
@@ -540,6 +622,7 @@
          this.width = this.height = 0;
       
          this.children = [];
+         this.entity = entity;
       },
       contains: function(x, y) {
          var pos = this.getPosition();
@@ -550,6 +633,20 @@
             return true;
          else
             return false;
+      },
+      distance: function(other) {
+        var dx = (other.position.x + other.width / 2) - (this.position.x + this.width / 2);
+        var dy = (other.position.y + other.height / 2) - (this.position.y + this.height / 2);
+
+        return Math.sqrt(dx * dx + dy * dy);
+      },
+      collides: function(other) {
+         var isLeft  = other.position.x >= this.position.x + this.width;
+         var isRight = other.position.x + other.width <= this.position.x;
+         var isAbove = other.position.y >= this.position.y + this.height;
+         var isBelow = other.position.y + other.height <= this.position.y;
+
+         return !isLeft && !isRight && !isAbove && !isBelow;
       },
       getPosition: function() {
          if (this.parent) {
@@ -575,7 +672,8 @@
             return this.scale;
       },
       addChild: function(child) {
-         child.parent = this;
+         child.parent           = this.entity;
+         child.transform.parent = this;
          this.children.push(child);
       }
    });
@@ -602,6 +700,8 @@
 
       this.align(alignment || 'left');
 
+      this.opacity = 1;
+
       return this.set({
          text:      text,
          font:      font,
@@ -617,7 +717,7 @@
       if (cfg.fillStyle)
          this.fillStyle = cfg.fillStyle;
 
-      return this.render(); // Enable chaining
+      return this.draw(); // Enable chaining
    };
 
    Text.prototype.align = function(alignment) {
@@ -627,7 +727,7 @@
          console.warn(alignment, 'is not a valid alignment');
    };
 
-   Text.prototype.render = function() {
+   Text.prototype.draw = function() {
       this.context.font      = this.font;
       this.context.fillStyle = this.fillStyle;
 
@@ -641,14 +741,16 @@
       this.context.font      = this.font;
       this.context.fillStyle = this.fillStyle;
 
-      this.context.fillText(this.text, 0, 0);//size.height);
+      this.context.fillText(this.text, 0, 0);
 
-      this.updated = true;
+      if (this.entity && this.entity.state) {
+         this.entity.state.updated = true;
+      }
 
       return this;
    };
 
-   Text.prototype.draw = function(context) {
+   Text.prototype.render = function(context, sx, sy, swidth, sheight, dx, dy, dwidth, dheight) {
       arguments[0] = this.canvas;
 
       if (this.alignment !== 'left') {
@@ -660,9 +762,12 @@
             arguments[dx] -= this.canvas.width;
       }
 
+      var originalAlpha = context.globalAlpha;
+      context.globalAlpha = this.opacity;
+
       context.drawImage.apply(context, arguments);
 
-      this.updated = false;
+      context.globalAlpha = originalAlpha;
    };
 
    return Juicy;
