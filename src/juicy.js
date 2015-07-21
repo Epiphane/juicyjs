@@ -8,15 +8,15 @@
    } else {
       context.Juicy = factory(context);
    }
-})(this, function() {
+})(this, function(context) {
    /* -------------------- Animation frames ----------------- */
-   window = window || {};
-   window.requestAnimFrame = (function() {
-      return window.requestAnimationFrame ||
-         window.webkitRequestAnimationFrame ||
-         window.mozRequestAnimationFrame    ||
+   context = context || {};
+   context.requestAnimFrame = (function() {
+      return context.requestAnimationFrame ||
+         context.webkitRequestAnimationFrame ||  
+         context.mozRequestAnimationFrame    ||
          function(callback) {
-            window.setTimeout(callback, 1000 / 60);
+            context.setTimeout(callback, 1000 / 60);
          };
       })();
 
@@ -143,7 +143,7 @@
          return;
 
       var self = this;
-      window.requestAnimFrame(function() {
+      context.requestAnimFrame(function() {
          self.update();
       });
       var nextTime = new Date().getTime();
