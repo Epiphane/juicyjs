@@ -57,9 +57,58 @@
       this.height = height;
       this.setCanvas(canvas);
 
+      this.loading = false;
+      this.waitingForLoad = false;
+
       this.mouse = { x: 0, y: 0 };
 
       return this; // Enable chaining
+   };
+
+   Game.prototype.preload = function(images, audio) {
+      images = images || [];
+      audio = audio || [];
+
+      var self      = this;
+      var numAssets = images.length + audio.length;
+      var loaded    = 0;
+      var unlock    = function() {
+         loaded ++;
+         if (loaded === numAssets) {
+            self.loading = false;
+            if (self.waitingForLoad) {
+               self.waitingForLoad = false;
+
+               self.run();
+            }
+         }
+         else {
+            self.onprogress(loaded / numAssets);
+         }
+      };
+
+      // Create fancy loading screen if we don't have one
+      if (!this.onprogress) {
+         var size = this.canvas.width / numAssets;
+         this.onprogress = function(progress) {
+            var ctx = this.canvas.getContext('2d');
+            ctx.fillStyle = 'rgb(' + Juicy.rand(255) + ', ' + Juicy.rand(255) + ', ' + Juicy.rand(255) + ')';
+            ctx.fillRect(this.canvas.width * progress - size, 0, size, this.canvas.height);
+         };
+      }
+
+      this.loading = true;
+      for (var i = 0; i < images.length; i ++) {
+         var img = new Image();
+         img.src = images[i];
+         img.onload = unlock;
+      }
+
+      for (var i = 0; i < audio.length; i ++) {
+         var aud = new Audio();
+         aud.src = audio[i];
+         aud.oncanplaythrough = unlock;
+      }
    };
 
    Game.prototype.setInput = function(input) {
@@ -197,6 +246,11 @@
    };
 
    Game.prototype.run = function() {
+      if (this.loading) {
+         this.waitingForLoad = true;
+         return;
+      }
+
       this.running = true;
       this.lastTime = new Date().getTime();
 
