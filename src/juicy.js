@@ -62,7 +62,17 @@
 
       this.mouse = { x: 0, y: 0 };
 
+      this.DEBUG = false;
+
       return this; // Enable chaining
+   };
+
+   Game.prototype.setDebug = function(debug) {
+      this.DEBUG = debug;
+      if (debug) {
+         this._fps = [];
+         this._fpsLogged = 0;
+      }
    };
 
    Game.prototype.preload = function(images, audio) {
@@ -135,14 +145,35 @@
       this.context = canvas.getContext('2d');
 
       var self = this;
-      canvas.onclick = function(evt) {
-         evt = self.getCanvasCoords(evt);
-         self.click(evt.x, evt.y);
-      }
+      var startDrag = false;
+      canvas.onmousedown = function(evt) {
+         startDrag = evt;
+         self.trigger('dragstart', evt)
+      };
+      canvas.onmouseup = function(evt) {
+         var startPos = self.getCanvasCoords(startDrag);
+         var endPos   = self.getCanvasCoords(evt);
+
+         var dx = startPos.x - endPos.x;
+         var dy = startPos.y - endPos.y;
+         var dist = Math.sqrt(dx * dx + dy * dy);
+         if (dist <= 2) {
+            self.trigger('click', evt)
+         }
+         else {
+            self.trigger('dragend', evt)
+         }
+
+         startDrag = false;
+      };
       canvas.onmousemove = function(evt) {
-         evt = self.getCanvasCoords(evt);
-         self.mouse.x = evt.x;
-         self.mouse.y = evt.y;
+         var pos = self.getCanvasCoords(evt);
+         self.mouse.x = pos.x;
+         self.mouse.y = pos.y;
+
+         if (startDrag) {
+            self.trigger('drag', evt);
+         }
       }
 
       return this.resize();
@@ -172,7 +203,9 @@
    };
 
    Game.prototype.setState = function(state) {
-      this.input.clear();
+      if (this.input) {
+         this.input.clear();
+      }
 
       this.state = state;
       this.state.game = this;
@@ -182,9 +215,10 @@
       return this; // Enable chaining
    };
 
-   Game.prototype.click = function(x, y) {
-      if (this.state)
-         this.state.click(x, y);
+   Game.prototype.trigger = function(evt, pos) {
+      pos = this.getCanvasCoords(pos);
+      if (this.state && this.state[evt])
+         this.state[evt](pos.x, pos.y);
    };
 
    Game.prototype.update = function() {
@@ -192,7 +226,7 @@
          return;
 
       var self = this;
-      context.requestAnimFrame(function() {
+      window.requestAnimFrame(function() {
          self.update();
       });
       var nextTime = new Date().getTime();
@@ -201,6 +235,27 @@
       if (dt > 0.2) {
         this.lastTime = nextTime;
         return;
+      }
+      if (this.DEBUG) {
+         if (this._fps.length === 30) {
+            this._fps.splice(0, 1);
+         }
+         this._fps.push(dt);
+
+         var tot = 0;
+         for (var i = 0; i < this._fps.length; i ++) {
+            tot += this._fps[i];
+         }
+
+         this.fps = this._fps.length / tot;
+         if (this.fps < 50 && this._fpsLogged-- <= 0) {
+            this._fpsLogged = 100; // Wait 100 frames
+            console.warn('Possible bottleneck: FPS down to ', this.fps, '(', 1 / this.fps, ' sec per frame)');
+         }
+         else if (this._fpsLogged-- <= 0) {
+            this._fpsLogged = 500; // Wait 100 frames
+            console.log('FPS: ', this.fps);
+         }
       }
 
       try {
@@ -343,13 +398,6 @@
          return null;
       }
 
-      if (this.dt) {
-         if (this.updated[name] === 1)
-            throw 'Circular component dependency: ' + name + '<>';
-         else if (!this.updated[name])
-            this.update(this.dt, name);
-      }
-
       return this.components[name];
    };
    Entity.prototype.update = function(dt, name) {
@@ -382,8 +430,9 @@
          args.push(this.transform.height);
       }
 
-      for(var key in this.components)
+      for(var key in this.components) {
          this.components[key].render.apply(this.components[key], args);
+      }
 
       if (this.transform.children.length > 0) {
          for(var i = 0; i < this.transform.children.length; i ++) {
@@ -418,7 +467,7 @@
       if (Juicy.Components[name])
          console.warn('Overriding component', name);
 
-      return Juicy.Components[name] = Component.extend(protoProps, staticProps)
+      return Juicy.Components[name] = this.extend(protoProps, staticProps)
    };
 
    /* -------------------- Input manager -------------------- */
@@ -569,7 +618,7 @@
       if (protoProps)
          combine(child.prototype, protoProps);
 
-      child.__super__ = parent.prototype;
+      child.prototype.__super__ = parent.prototype;
 
       return child;
    };
@@ -665,6 +714,24 @@
          //                  w || sc.x * transform.width, 
          //                  h || sc.y * transform.height);
          context.fillRect(x, y, w, h);
+      }
+   });
+
+   Component.create('Text', {
+      constructor: function(entity) {
+         this.text = new Juicy.Text();
+      },
+      set: function(config) {
+         this.text.set(config);
+
+         this.entity.transform.width  = this.text.canvas.width;
+         this.entity.transform.height = this.text.canvas.height;
+      },
+      align: function(alignment) {
+         this.text.align(alignment);
+      },
+      render: function(context) {
+         this.text.render(context, 0, 0);
       }
    });
 
