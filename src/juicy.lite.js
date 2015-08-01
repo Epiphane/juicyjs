@@ -5,38 +5,6 @@
  * (Like you use anything else anyway...)
  */
 (function(window, document) {
-   /* Legit string haxxing for ultimate space gainz
-    * Original                       Minified
-    * ------------------------------------------
-    * this.variable = 10;         ->    this.variable=10;
-    *
-    *                 vs
-    * 
-    * var variable = 'variable';  ->    var v='variable';
-    * this[variable] = 10;              this[v]=10;
-    * ------------------------------------------
-    * 
-    * After using `variable` TWICE you've already saved data!
-    */ 
-   var newCanvas= function() { return document.createElement('canvas'); };
-   var noop     = function() {};
-   var proto    = 'prototype';
-   var listener = 'listener';
-   var _width   = 'width';
-   var _height  = 'height';
-   var _canvas  = 'canvas';
-   var _context = 'context';
-   var __hasRendered = '_hR';
-
-   // Used by components
-   var fillStyle   = 'fillStyle';
-   var font        = 'font';
-   var text        = 'text';
-   var opacity     = 'opacity';
-   var globalAlpha = 'globalAlpha'; 
-   var _tint       = '_tint';
-   var drawImage   = 'drawImage';
-
    /* -------------------- Animation frames ----------------- */
    var requestAnimationFrame = (function() {
       return window.requestAnimationFrame ||
@@ -94,8 +62,8 @@
 
    Game.init = function(canvas, width, height, keys) {
       Game_running = false;
-      Game[_width]   = width;
-      Game[_height]  = height;
+      Game.width   = width;
+      Game.height  = height;
       Game.setCanvas(canvas);
 
       // Input stuff
@@ -156,8 +124,8 @@
       var my = evt.clientY - canvasRect.top;
 
       return {
-         x: Math.floor(mx * Game[_width] /  Game_canvas[_width]), 
-         y: Math.floor(my * Game[_height] / Game_canvas[_height])
+         x: Math.floor(mx * Game.width /  Game_canvas.width), 
+         y: Math.floor(my * Game.height / Game_canvas.height)
       };
    };
 
@@ -202,23 +170,23 @@
 
    Game.resize = function() {
       var parent = Game_canvas.parentElement;
-      var width  = parent[_width]  || parent.clientWidth;
-      var height = parent[_height] || parent.clientHeight;
+      var width  = parent.width  || parent.clientWidth;
+      var height = parent.height || parent.clientHeight;
 
-      Game_canvas[_width]  = width;
-      Game_canvas[_height] = width * Game[_height] / Game[_width];
-      if (Game_canvas[_height] > height) {
-         Game_canvas[_height] = height;
-         Game_canvas[_width] = height * Game[_width] / Game[_height];
+      Game_canvas.width  = width;
+      Game_canvas.height = width * Game.height / Game.width;
+      if (Game_canvas.height > height) {
+         Game_canvas.height = height;
+         Game_canvas.width = height * Game.width / Game.height;
       }
       Game_scale = {
-         x: Game_canvas[_width]  / Game[_width],
-         y: Game_canvas[_height] / Game[_height]
+         x: Game_canvas.width  / Game.width,
+         y: Game_canvas.height / Game.height
       };
 
       // Make sure we re-render
       if (Game_state)
-         Game_state[__hasRendered] = false;
+         Game_state.__hasRendered = false;
       
       // Don't enable chaining
    };
@@ -229,7 +197,7 @@
       Game_state = state;
       Game_state.game = Game;
       Game_state.init();
-      Game_state[__hasRendered] = false;
+      Game_state.__hasRendered = false;
 
       // Don't enable chaining
    };
@@ -258,9 +226,9 @@
          
          Game_lastTime = nextTime;
 
-         if (updated || !Game_state[__hasRendered]) {
+         if (updated || !Game_state.__hasRendered) {
             Game.render();
-            Game_state[__hasRendered] = true;
+            Game_state.__hasRendered = true;
          }
       }
       catch (e) {
@@ -274,7 +242,7 @@
 
       Game_context.scale(Game_scale.x, Game_scale.y);
       if (!Game_state.stopClear)
-         Game_context.clearRect(0, 0, Game[_width], Game[_height]);
+         Game_context.clearRect(0, 0, Game.width, Game.height);
 
       Game_state.render(Game_context);
 
@@ -307,10 +275,10 @@
     *                         IMPORTANT: return true if you don't want to re-render
     *    render (context)   - Run after  update.    Use for graphics
     */
-   var State = Juicy.State = function() {};
-   State[proto].init       = noop;
-   State[proto].update     = noop;
-   State[proto].render     = noop;
+   var State = Juicy.State = function() {/* Ghost to avoid getting noopped */};
+   State.prototype.init    = // function() {}
+   State.prototype.update  = // function() {}
+   State.prototype.render  = function() {};
 
    /* -------------------- Game Entity ----------------------- */
    /* 
@@ -336,7 +304,7 @@
       // Transform component
       this.position = { x: 0, y: 0 };
       this.scale    = { x: 1, y: 1 };
-      this[_width] = this[_height] = 0;
+      this.width = this.height = 0;
 
       for (var i = 0; i < components.length; i ++) {
          this.addComponent(components[i]);
@@ -345,8 +313,8 @@
       if (this.init)
          this.init();
    };
-   Entity[proto].components = [];
-   Entity[proto].addComponent = function(c, name) {
+   Entity.prototype.components = [];
+   Entity.prototype.addComponent = function(c, name) {
       if (typeof(c) === 'function')
          c = new c(this);
       else if (typeof(c) === 'string') {
@@ -369,10 +337,10 @@
          this.components[name] = c;
       }
    };
-   Entity[proto].getComponent = function(name) {
+   Entity.prototype.getComponent = function(name) {
       return this.components[name];
    };
-   Entity[proto].update = function(dt, name) {
+   Entity.prototype.update = function(dt, name) {
       if (name && !this.updated[name]) {
          this.updated[name] = true;
          this.components[name].update(dt, this.state.game);
@@ -387,18 +355,18 @@
          }
       }
    };
-   Entity[proto].render = function(context) {
+   Entity.prototype.render = function(context) {
       context.save();
       var pos = this.position;
       context.translate(pos.x, pos.y);
       context.scale(this.scale.x, this.scale.y);
 
-      var args = Array[proto].slice.call(arguments);
+      var args = Array.prototype.slice.call(arguments);
       if (args.length === 1) {
          args.push(0);
          args.push(0);
-         args.push(this[_width]);
-         args.push(this[_height]);
+         args.push(this.width);
+         args.push(this.height);
       }
 
       for(var key in this.components) {
@@ -413,7 +381,7 @@
       }
       context.restore();
    };
-   Entity[proto].addChild = function(child) {
+   Entity.prototype.addChild = function(child) {
       child.parent = this;
       this.children.push(child);
    };
@@ -430,10 +398,10 @@
     * Component.create(name, prototype, static[, force]) 
     *    - Extend and register by name. Force to override another component
     */
-   var Component = Juicy.Component = function() {};
-   Component[proto].name   = null;
-   Component[proto].update = noop;
-   Component[proto].render = noop;
+   var Component = Juicy.Component = function() {/* Ghost to avoid getting noopped */};
+   Component.prototype.name   = 0;
+   Component.prototype.update = // function() {}
+   Component.prototype.render = function() {};
 
    // Map of names to components
    Juicy.Components = {};
@@ -445,16 +413,12 @@
 
    /* Credit to Underscore.js */
    var combine = function(obj) {
-      var length = arguments.length;
-      if (length < 2 || obj == null) return obj;
-
-      for (var index = 1; index < length; index++) {
+      for (var index = 1; index < arguments.length; index++) {
          var source = arguments[index];
          for (var key in source) {
             obj[key] = source[key];
          }
       }
-      return obj;
    };
 
    /* Credit to Backbone.js */
@@ -462,24 +426,21 @@
       var parent  = this;
       var child;
 
-      protoProps  = protoProps  || {};
-      staticProps = staticProps || {};
-
-      if (Object.keys(protoProps).indexOf('constructor') >= 0)
+      if (protoProps.constructor !== protoProps.__proto__.constructor)
          child = protoProps.constructor;
       else
          child = function() { return parent.apply(this, arguments); };
 
-      combine(child, parent, staticProps);
+      combine(child, parent, staticProps || {});
 
       var Surrogate = function(){ this.constructor = child; };
-      Surrogate[proto] = parent[proto];
-      child[proto] = new Surrogate;
+      Surrogate.prototype = parent.prototype;
+      child.prototype = new Surrogate;
 
       if (protoProps)
-         combine(child[proto], protoProps);
+         combine(child.prototype, protoProps);
 
-      child[proto].__super__ = parent[proto];
+      child.prototype.__super__ = parent.prototype;
 
       return child;
    };
@@ -491,18 +452,18 @@
       constructor: function(entity) {
          var self = this;
 
-         this[_tint] = false;
+         this._tint = false;
          this.opacity = 1;
 
          this.image = new Image();
          this.image.onload = function() {
-            if (!entity[_width] && !entity[_height]) {
-               entity[_width]  = this[_width];
-               entity[_height] = this[_height];
+            if (!entity.width && !entity.height) {
+               entity.width  = this.width;
+               entity.height = this.height;
             }
 
-            if (self[_tint]) {
-               self.setTint(self[_tint]);
+            if (self._tint) {
+               self.setTint(self._tint);
             }
 
             if (self.onload) {
@@ -519,26 +480,26 @@
       },
       setTint: function(tint) {
          // TODO glean alpha of tint
-         this[_tint] = tint;
+         this._tint = tint;
 
          if (this.image.complete) {
             // Apply tint
-            var canvas = this[_canvas] = this[_canvas] || newCanvas('canvas');
+            var canvas = this.canvas = this.canvas || document.createElement('canvas');
 
-            canvas[_width] = this.image[_width];
-            canvas[_height] = this.image[_height];
+            canvas.width = this.image.width;
+            canvas.height = this.image.height;
 
             var context = canvas.getContext('2d');
 
-            context[fillStyle] = this[_tint];
-            context.fillRect(0, 0, canvas[_width], canvas[_height]);
+            context.fillStyle = this._tint;
+            context.fillRect(0, 0, canvas.width, canvas.height);
 
             // destination atop makes a result with an alpha channel identical to fg,
             // but with all pixels retaining their original color *as far as I can tell*
             context.globalCompositeOperation = "destination-atop";
-            context[globalAlpha] = 0.75;
-            context[drawImage](this.image, 0, 0);
-            context[globalAlpha] = 1;
+            context.globalAlpha = 0.75;
+            context.drawImage(this.image, 0, 0);
+            context.globalAlpha = 1;
          }
 
          return this; // Enable chaining
@@ -549,83 +510,83 @@
          return this; // Enable chaining
       },
       render: function(context) {
-         var originalAlpha = context[globalAlpha];
+         var originalAlpha = context.globalAlpha;
          var args          = arguments;
 
-         context[globalAlpha] = this[opacity];
+         context.globalAlpha = this.opacity;
          args[0] = this.image;
-         context[drawImage].apply(context, args);
+         context.drawImage.apply(context, args);
 
-         if (this[_tint]) {
-            args[0] = this[_canvas];
-            context[drawImage].apply(context, args);
+         if (this._tint) {
+            args[0] = this.canvas;
+            context.drawImage.apply(context, args);
          }
 
          // Restore original global alpha
-         context[globalAlpha] = originalAlpha;
+         context.globalAlpha = originalAlpha;
       }
    });
 
    Component.create('Box', {
       constructor: function() {
-         this[fillStyle] = 'white';
+         this.fillStyle = 'white';
       },
       render: function(context, x, y, w, h) {
-         context[fillStyle] = this[fillStyle];
+         context.fillStyle = this.fillStyle;
          context.fillRect(x, y, w, h);
       }
    });
 
    Component.create('Text', {
       constructor: function() {
-         this[_canvas] = newCanvas('canvas');
-         this[_context] = this[_canvas].getContext('2d');
+         this.canvas = document.createElement('canvas');
+         this.context = this.canvas.getContext('2d');
 
          // Text info
-         var info = this[text] = {};
+         var info = this.text = {};
 
-         info[font] = '32px Arial';
-         info[text] = '';
-         info[fillStyle] = 'white';
+         info.font = '32px Arial';
+         info.text = '';
+         info.fillStyle = 'white';
          
          // For accessing outside of this component
-         this[opacity] = 1;
+         this.opacity = 1;
       },
       set: function(config) {
-         var info    = this[text];
+         var info    = this.text;
          var entity  = this.entity;
-         var context = this[_context];
-         var canvas  = this[_canvas];
+         var context = this.context;
+         var canvas  = this.canvas;
 
          // Set attributes
-         info[font] = config.font           || info[font];
-         info[text] = config.text           || info[text];
-         info[fillStyle] = config.fillStyle || info[fillStyle];
+         info.font = config.font           || info.font;
+         info.text = config.text           || info.text;
+         info.fillStyle = config.fillStyle || info.fillStyle;
 
          // Measure the text size
-         context[font]      = info[font];
-         context[fillStyle] = info[fillStyle];
-         var size = context.measureText(info[text]);
+         context.font      = info.font;
+         context.fillStyle = info.fillStyle;
+         var size = context.measureText(info.text);
 
          // Resize canvas
-         entity[_width]  = canvas[_width] = Math.ceil(size[_width]);
-         entity[_height] = canvas[_height] = Math.ceil(parseInt(info[font]) * 5 / 3);
+         entity.width  = canvas.width = Math.ceil(size.width);
+         entity.height = canvas.height = Math.ceil(parseInt(info.font) * 5 / 3);
 
          // Draw text
          context.textBaseline = 'top';
-         context[font]        = info[font];
-         context[fillStyle]   = info[fillStyle];
-         context.fillText(info[text], 0, 0);
+         context.font        = info.font;
+         context.fillStyle   = info.fillStyle;
+         context.fillText(info.text, 0, 0);
       },
       render: function(context) {
          // Save original alpha
-         var originalAlpha = context[globalAlpha];
-         context[globalAlpha] = this[opacity];
+         var originalAlpha = context.globalAlpha;
+         context.globalAlpha = this.opacity;
 
-         arguments[0] = this[_canvas];
-         context[drawImage].apply(context, arguments);
+         arguments[0] = this.canvas;
+         context.drawImage.apply(context, arguments);
 
-         context[globalAlpha] = originalAlpha;
+         context.globalAlpha = originalAlpha;
       }
    });
 })(window, document);
