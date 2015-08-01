@@ -18,7 +18,7 @@ var GameScreen = Juicy.State.extend({
       // with a specific image you set
       this.pic = new Juicy.Entity(this, ['Image']);
       this.pic.position.x = 300;
-      this.pic.getComponent('Image').setImage('https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSxLS2z0JOP62RuEwe2WPgsRmy-n6oPyeqIl0kWWfosylUBDDXL6FEVfACx');      
+      this.pic.getComponent('Image').setImage('doge.jpeg');      
 
       // This is virtually the same, as an example of a custom entity
       this.dude = new Dude(this);

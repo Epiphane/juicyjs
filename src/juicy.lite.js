@@ -617,9 +617,6 @@
          context.fillText(info[text], 0, 0);
       },
       render: function(context) {
-         var info   = this[text];
-         var entity = this.entity;
-
          // Save original alpha
          var originalAlpha = context[globalAlpha];
          context[globalAlpha] = this[opacity];
