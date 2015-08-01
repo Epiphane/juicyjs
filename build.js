@@ -120,7 +120,7 @@ function buildHTMLFile(data, url) {
 function injectScriptsAndSave(path, html, js) {
    js = UglifyJS.minify(js.join('\n'), {
       warnings: true,
-      fromString: true,
+      fromString: true
    });
 
    html = html.replace(/<script.*?src=((?!\/\/).)*? ?><\/script>/, '<script>' + js.code + '</script>');

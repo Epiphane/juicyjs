@@ -19,6 +19,7 @@
     * After using `variable` TWICE you've already saved data!
     */ 
    var newCanvas= function() { return document.createElement('canvas'); };
+   var noop     = function() {};
    var proto    = 'prototype';
    var listener = 'listener';
    var _width   = 'width';
@@ -307,9 +308,9 @@
     *    render (context)   - Run after  update.    Use for graphics
     */
    var State = Juicy.State = function() {};
-   State[proto].init       = function() {};
-   State[proto].update     = function(dt, input) {};
-   State[proto].render     = function(context) {};
+   State[proto].init       = noop;
+   State[proto].update     = noop;
+   State[proto].render     = noop;
 
    /* -------------------- Game Entity ----------------------- */
    /* 
@@ -429,10 +430,10 @@
     * Component.create(name, prototype, static[, force]) 
     *    - Extend and register by name. Force to override another component
     */
-   var Component = Juicy.Component = function(entity) {};
+   var Component = Juicy.Component = function() {};
    Component[proto].name   = null;
-   Component[proto].update = function(dt) {};
-   Component[proto].render = function(context) {};
+   Component[proto].update = noop;
+   Component[proto].render = noop;
 
    // Map of names to components
    Juicy.Components = {};
@@ -542,12 +543,12 @@
 
          return this; // Enable chaining
       },
-      setImage: function(url, tint) {
+      setImage: function(url) {
          this.image.src = url;
 
          return this; // Enable chaining
       },
-      render: function(context, sx, sy, swidth, sheight, dx, dy, dwidth, dheight) {
+      render: function(context) {
          var originalAlpha = context[globalAlpha];
          var args          = arguments;
 
@@ -566,7 +567,7 @@
    });
 
    Component.create('Box', {
-      constructor: function(entity) {
+      constructor: function() {
          this[fillStyle] = 'white';
       },
       render: function(context, x, y, w, h) {
