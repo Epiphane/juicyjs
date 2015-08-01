@@ -90,6 +90,9 @@ var GameScreen = Juicy.State.extend({
       });
    },
 
+   key_UP: function() {
+      console.log('up!');
+   },
 
    // click is called whenever the scene gets clicked on
    // x and y are always scaled, so they will be from [0, GAME_WIDTH] and [0, GAME_HEIGHT]

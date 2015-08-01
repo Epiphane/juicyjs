@@ -47,7 +47,7 @@
       })();
 
    /* Base object */
-   var Juicy = window.J = window.Juicy = {};
+   var Juicy = window.Juicy = {};
 
    /* ---------------- Helper functions NO MORE ------------- */
 
@@ -67,19 +67,19 @@
     *    run      ()              - Begin game running
     */
    var Game = Juicy.Game = {};
-   var Game_running = false;
    var Game_scale = { x: 1, y: 1 };
    var Game_mouse = { x: 0, y: 0 };
-   var Game_state;
-   var Game_canvas, Game_context;
-   var Game_lastTime;
+   var Game_running  = false;
+   var Game_state    = false;
+   var Game_canvas   = false;
+   var Game_context  = false;
+   var Game_lastTime = false;
 
    // Set up document-wide input for game
    var keyState = {};
    var KEYS     = {};
    var CODES    = {};
    var listener = {};
-   var currentGame = false;
    document.onkeydown = function(evt) {
       keyState[evt.keyCode] = true;
    };
@@ -275,12 +275,7 @@
       if (!Game_state.stopClear)
          Game_context.clearRect(0, 0, Game[_width], Game[_height]);
 
-      try {
-         Game_state.render(Game_context);
-      } catch (err) {
-         console.error(err.stack);
-         Game.pause();
-      }
+      Game_state.render(Game_context);
 
       Game_context.restore();
 
@@ -512,6 +507,8 @@
             if (self.onload) {
                self.onload(this);
             }
+
+            entity.state.updated = true;
          }
          this.image.onerror = function() {
             self.image = new Image();
