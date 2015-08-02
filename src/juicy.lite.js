@@ -18,7 +18,27 @@
    /* Base object */
    var Juicy = window.Juicy = {};
 
-   /* ---------------- Helper functions NO MORE ------------- */
+   /* ---------------------- Utility ------------------------ */
+   var Point = Juicy.Point = function(x, y) {
+      this.x = x = x || 0;
+      this.y = y || x;
+   };
+
+   Point.prototype.add = function(other) {
+      return new Point(this.x + other.x, this.y + other.y);
+   };
+
+   Point.prototype.mult = function(other) {
+      return new Point(this.x * other.x, this.y * other.y);
+   };
+   
+   Point.prototype.sub = function(other) {
+      return this.add(other.mult({ x: -1, y: -1 }));
+   };
+
+   Point.prototype.length = function(other) {
+      return Math.sqrt(this.x * this.x + this.y * this.y);
+   };
 
    /* -------------------- Game Handler --------------------- */
    /* 
@@ -36,8 +56,8 @@
     *    run      ()              - Begin game running
     */
    var Game = Juicy.Game = {};
-   var Game_scale = { x: 1, y: 1 };
-   var Game_mouse = { x: 0, y: 0 };
+   var Game_scale = new Point(1);
+   var Game_mouse = new Point();
    var Game_running  = false;
    var Game_state    = false;
    var Game_canvas   = false;
@@ -67,13 +87,13 @@
       Game.setCanvas(canvas);
 
       // Input stuff
-      KEYS     = keys;
+      KEYS     = keys || {};
       CODES    = {};
       for (var key in keys) {
          CODES[keys[key]] = key;
       }
 
-      // Don't enable chaining
+      return this; // Enable chaining
    };
 
    Game.keyDown = function(key) {
@@ -108,10 +128,10 @@
          document.addEventListener(action, listener[action] = keys);
       }
 
-      // Don't enable chaining
+      return this; // Enable chaining
    };
 
-   Game.clear = function() {
+   var Game_clear = function() {
       for (var action in listener) {
          document.removeEventListener(action, listener[action]);
       }
@@ -123,10 +143,7 @@
       var mx = evt.clientX - canvasRect.left;
       var my = evt.clientY - canvasRect.top;
 
-      return {
-         x: Math.floor(mx * Game.width /  Game_canvas.width), 
-         y: Math.floor(my * Game.height / Game_canvas.height)
-      };
+      return new Point(Math.floor(mx * Game.width /  Game_canvas.width), Math.floor(my * Game.height / Game_canvas.height));
    };
 
    Game.setCanvas = function(canvas) {
@@ -142,10 +159,7 @@
          var startPos = Game.getCanvasCoords(startDrag);
          var endPos   = Game.getCanvasCoords(evt);
 
-         var dx = startPos.x - endPos.x;
-         var dy = startPos.y - endPos.y;
-         var dist = Math.sqrt(dx * dx + dy * dy);
-         if (dist <= 2) {
+         if (startPos.sub(endPos).length() <= 2) {
             Game.trigger('click', evt);
          }
          else {
@@ -155,9 +169,7 @@
          startDrag = false;
       };
       canvas.onmousemove = function(evt) {
-         var pos = Game.getCanvasCoords(evt);
-         Game_mouse.x = pos.x;
-         Game_mouse.y = pos.y;
+         Game_mouse = Game.getCanvasCoords(evt);
 
          if (startDrag) {
             Game.trigger('drag', evt);
@@ -165,7 +177,7 @@
       }
 
       Game.resize();
-      // Don't enable chaining
+      return this; // Enable chaining
    };
 
    Game.resize = function() {
@@ -179,33 +191,29 @@
          Game_canvas.height = height;
          Game_canvas.width = height * Game.width / Game.height;
       }
-      Game_scale = {
-         x: Game_canvas.width  / Game.width,
-         y: Game_canvas.height / Game.height
-      };
+      Game_scale = new Point(Game_canvas.width  / Game.width, Game_canvas.height / Game.height);
 
       // Make sure we re-render
       if (Game_state)
          Game_state.__hasRendered = false;
       
-      // Don't enable chaining
+      return this; // Enable chaining
    };
 
    Game.setState = function(state) {
-      Game.clear();
+      Game_clear();
 
       Game_state = state;
       Game_state.game = Game;
       Game_state.init();
       Game_state.__hasRendered = false;
 
-      // Don't enable chaining
+      return this; // Enable chaining
    };
 
    Game.trigger = function(evt, pos) {
-      pos = Game.getCanvasCoords(pos);
       if (Game_state && Game_state[evt])
-         Game_state[evt](pos.x, pos.y);
+         Game_state[evt](Game.getCanvasCoords(pos));
    };
 
    Game.update = function() {
@@ -248,7 +256,7 @@
 
       Game_context.restore();
 
-      // Don't enable chaining
+      return this; // Enable chaining
    };
 
    Game.run = function() {
@@ -257,7 +265,7 @@
 
       Game.update();
 
-      // Don't enable chaining
+      return this; // Enable chaining
    };
 
    Game.pause = function() {
@@ -294,6 +302,10 @@
     */
    var untitledComponents = 0;
    var Entity = Juicy.Entity = function(state, components) {
+      // Extra catch
+      if (typeof(components) === 'string')
+         components = [components];
+
       this.components = {};
       this.updated    = {};
       this.state      = state;
@@ -302,8 +314,8 @@
       components = components || this.__proto__.components;
          
       // Transform component
-      this.position = { x: 0, y: 0 };
-      this.scale    = { x: 1, y: 1 };
+      this.position = new Point();
+      this.scale    = new Point(1);
       this.width = this.height = 0;
 
       for (var i = 0; i < components.length; i ++) {
@@ -384,6 +396,21 @@
    Entity.prototype.addChild = function(child) {
       child.parent = this;
       this.children.push(child);
+   };
+   Entity.prototype.globalPosition = function() {
+      var position = this.position;
+      var parent;
+      if (parent = this.parent)
+         return parent.globalPosition().add(this.position.mult(parent.globalScale()));
+      else
+         return position;
+   };
+   Entity.prototype.globalScale = function() {
+      var scale = this.scale;
+      if (this.parent)
+         return this.scale.mult(this.parent.globalScale());
+      else
+         return scale;
    };
 
    /* -------------------- Game Component -------------------- */

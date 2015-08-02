@@ -27,14 +27,14 @@ Juicy.Components.Particle.create('GravityPoint', {
 
                 var other = points[i].getComponent('GravityPoint');
                 if ((this.currentRadius >= other.radius || this.dragging) &&
-                    this.entity.transform.distance(points[i].transform) < (this.currentRadius + other.radius) * 0.85) {
+                    this.entity.distance(points[i]) < (this.currentRadius + other.radius) * 0.85) {
                     points[i].dead = true;
                     this.mass += other.mass;
 
-                    var thispos = new Vector(this.entity.transform.position.x,
-                                             this.entity.transform.position.y);
-                    var otherpos = new Vector(points[i].transform.position.x,
-                                              points[i].transform.position.y);
+                    var thispos = new Vector(this.entity.position.x,
+                                             this.entity.position.y);
+                    var otherpos = new Vector(points[i].position.x,
+                                              points[i].position.y);
 
                     this.speed = this.speed.add(thispos.sub(otherpos).scale(other.radius / this.radius * 0.5));
 

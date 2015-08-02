@@ -11,9 +11,6 @@ Juicy.Component.create('Custom', {
    // Again, constructor function called automatically
    constructor: function(entity) {
       this.val = 10;
-
-      // Juicy Text. nothing new
-      this.counter = new Juicy.Text('10', '20pt Arial');
    },
 
    // Member function! This is totally custom and can be called
@@ -21,17 +18,8 @@ Juicy.Component.create('Custom', {
    increment: function() {
       this.val += 10;
 
-      // Update text...
-      this.counter.set({ text: this.val });
-   
-
       // See, we can reference the entity this is attached to.
-      this.entity.transform.position.x ++;
+      this.entity.position.x ++;
       this.entity.getComponent('OtherComponent'); // Doesn't find anything, but tries
-   },
-
-   // Called automatically when you call Entity.render();
-   render: function(context) {
-      this.counter.render(context, 0, 0);
    }
-})
+});

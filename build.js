@@ -142,6 +142,27 @@ function injectScriptsAndSave(path, html, js) {
 }
 
 function minifyCommonUsages(source) {
+   // Convert Juicy.*** to J.* for super shortness!
+   if (source.match(/_J/)) {
+      throw 'Source already contains a _J variable. What are you thinkin\'?';
+   }
+   source = source.replace(/(var |window\.)Juicy/g, '$1_J');
+   source = source.replace(/Juicy([\.\[][A-Za-z])/g, '_J$1');
+   
+   var classes = {
+      Game: 'G',
+      Point: 'P',
+      State: 'S',
+      Entity: 'E',
+      Component: 'C',
+      Components: 'Cs',
+   };
+   for (var c in classes) {
+      var find = new RegExp('\\.' + c, 'g');
+
+      source = source.replace(find, '.' + classes[c]);
+   }
+
    /* Legit string haxxing for ultimate space gainz
     * Original                       Minified
     * ------------------------------------------
@@ -199,10 +220,8 @@ function minifyCommonUsages(source) {
    var src = lines.join('');
    while (match = Property.exec(src)) {
       if (match[1]) {
-         if (match[1].indexOf(']') >= 0)
-            console.log(Property, match[0], match[1]);
-
          calls[match[1]] = (calls[match[1]] || 0) + 1;
+         Property.lastIndex -= (match[1].length - 3); // Give it a little padding
       }
    }
 

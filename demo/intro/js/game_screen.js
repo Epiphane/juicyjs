@@ -2,7 +2,7 @@
 // states that your game can be in. Calling extend()
 // just makes sure that all the necessary data is in
 // place for the game to use.
-var GameScreen = Juicy.Scene.extend({
+var GameScreen = Juicy.State.extend({
 
 
    // This function is called when you say:
@@ -17,13 +17,13 @@ var GameScreen = Juicy.Scene.extend({
       // It basically fills up the entire bounding box of this entity
       // with a specific image you set
       this.pic = new Juicy.Entity(this, ['Image']);
-      this.pic.transform.position.x = 300;
-      this.pic.getComponent('Image').setImage('https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcSxLS2z0JOP62RuEwe2WPgsRmy-n6oPyeqIl0kWWfosylUBDDXL6FEVfACx');      
+      this.pic.position.x = 300;
+      this.pic.getComponent('Image').setImage('doge.jpeg');      
 
       // This is virtually the same, as an example of a custom entity
       this.dude = new Dude(this);
-      this.dude.transform.position.x = 10;
-      this.dude.transform.position.y = 10;
+      this.dude.position.x = 10;
+      this.dude.position.y = 10;
 
       // Of course you can change that color;
       this.dude.getComponent('Box').fillStyle = 'green';
@@ -33,16 +33,24 @@ var GameScreen = Juicy.Scene.extend({
       // Another feature is Juicy.Text. You can initialize it with
       // any amount of parameters, in the order [text, font, color, alignment]
       // If you want to change these later, use text.set(...);
-      this.title = new Juicy.Text('Hello!', '40pt Arial', 'white', 'center');
-      this.sub = new Juicy.Text('Welcome to JuicyJS!');
+      this.title = new Juicy.Entity(this, ['Text']);
+      this.title.getComponent('Text').set({
+         text: 'Hello!', 
+         font: '40pt Arial',
+         fillStyle: 'white'
+      });
+      this.sub = new Juicy.Entity(this, ['Text']);
+      this.sub.getComponent('Text').set({
+         text: 'Welcome to JuicyJS!'
+      });
 
 
 
       // Another basic entity. This one uses our Custom component
       // defined in src/components.custom.js
-      this.dudeWithComponent = new Juicy.Entity(this, ['Custom']);
-      this.dudeWithComponent.transform.position.x = 100;
-      this.dudeWithComponent.transform.position.y = 300;
+      this.dudeWithComponent = new Juicy.Entity(this, ['Custom', 'Text']);
+      this.dudeWithComponent.position.x = 100;
+      this.dudeWithComponent.position.y = 300;
    },
 
    // init is called whenever the state is swapped to.
@@ -56,7 +64,6 @@ var GameScreen = Juicy.Scene.extend({
       // These components are never used, but you can add them
       // by name (if they're created already), or you can
       // design a brand spankin' new component on the fly too
-      this.dudeWithComponent.addComponent('Box');
       this.dudeWithComponent.addComponent(Juicy.Component.extend({
          constructor: function() { console.log('I got initialized later!'); }
       }));
@@ -73,7 +80,7 @@ var GameScreen = Juicy.Scene.extend({
 
       // Define a callback to be used whenever 'W', 'A', 'S', or 'D' is pressed
       // These keys are defined in main.js
-      this.game.input.on('key', ['W', 'A', 'S', 'D'], function(key) {
+      this.game.on('key', ['W', 'A', 'S', 'D'], function(key) {
 
 
          // Notice I use self instead of this. `this` refers to god knows what
@@ -83,6 +90,9 @@ var GameScreen = Juicy.Scene.extend({
       });
    },
 
+   key_UP: function() {
+      console.log('up!');
+   },
 
    // click is called whenever the scene gets clicked on
    // x and y are always scaled, so they will be from [0, GAME_WIDTH] and [0, GAME_HEIGHT]
@@ -94,8 +104,11 @@ var GameScreen = Juicy.Scene.extend({
    // This is the function we call earlier. It's totally custom
    // and added as a member function to GameScreen
    myCustomFunction: function(input) {
-      this.lastButton = input;
-
+      // Text is buffered on a separate slate, so this actually renders it
+      // in the background.
+      this.title.getComponent('Text').set({
+         text: 'Hello! You pressed ' + input
+      });
 
       // this.updated is interesting. it tells the engine whether anything
       // has changed since the last frame. If it's false, then nothing is
@@ -126,24 +139,15 @@ var GameScreen = Juicy.Scene.extend({
       // Tell an entire entity to update! This would call update()
       // on each component. (Parameters: dt, input) just like this update
       this.dudeWithComponent.update(dt);
+      this.dudeWithComponent.getComponent('Text').set({
+         text: this.dudeWithComponent.getComponent('Custom').val
+      });
 
-
-      // Now, we don't actually need to check whether this.update is true.
-      // I do this for performance, because there's no point re-rendering
-      // it every time.
-      if (this.updated) {
-
-         // Text is buffered on a separate slate, so this actually renders it
-         // in the background.
-         this.title.set({
-            text: 'Hello! You pressed ' + this.lastButton
-         });
-      }
 
       // If we returned true here, then that would tell the game engine
       // nothing changed. By default, it assumes you mean false and just
       // calls a render anyway. I wouldn't worry about it too much
-      // return !this.updated;
+      return !this.updated;
    },
 
 
@@ -159,7 +163,7 @@ var GameScreen = Juicy.Scene.extend({
 
    
       // Draw our text
-      this.title.render(context, this.game.width / 2, 100);
+      this.title.render(context, (this.game.width - this.title.width) / 2, 100);
       this.sub.render(context, 200, 160);
 
 
