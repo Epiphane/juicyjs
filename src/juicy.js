@@ -44,22 +44,24 @@
    var AudioContext = new (window.AudioContext || window.webkitAudioContext)();
    var Sounds = {};
 
-   var Sound = Juicy.Sound = function(name, src, options) {
+   var Sound = Juicy.Sound = function(name, src, loop) {
       if (typeof(src) !== 'string') {
          src = name;
-         options = src;
+         loop = src;
       }
 
       this.name = src;
-      this.options = options || {};
 
       if (!Sounds[name]) {
-         Sound.load(name, src);
+         Sound.load(name, src, loop);
       }
    };
 
-   Sound.load = function(name, src) {
+   Sound.load = function(name, src, loop) {
       var sound  = Sounds[name] = document.createElement('audio');
+      if (loop) {
+         sound.loop = "loop";
+      }
       var source = document.createElement("source");
       source.src = src;
       sound.appendChild(source);
