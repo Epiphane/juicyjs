@@ -38,36 +38,29 @@ var canvas     = /* canvas pulled from document */
 var input      = /* Juicy.Input instance, see below */
 var firstState = /* Juicy.State instance, see below */
 
-var myGame = new Juicy.Game(canvas, game_width, game_height); // e.g. 1024x768
+var myGame = Juicy.Game.init(canvas, game_width, game_height, {
+  LEFT: 37,
+  UP: 38,
+  RIGHT: 39,
+  DOWN: 40,
+  ACTION: 32 // Space
+}); // e.g. 1024x768
 myGame.setInput(input);
 myGame.setState(firstState).run(); // Kick off the game!
 ```
 
 #### Input
 
-```Juicy.Input``` handles, primarily, keyboard and mouse input.
-
-Example:
-```
-var input = new Juicy.Input(document, {
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  ACTION: 32 // Space
-});
-```
-
 You can add or poll events using the following:
 
 ```
-var isUpPressed = input.keyDown('UP');
-var isArrowPressed = input.keyDown(['UP', 'DOWN', 'LEFT', 'RIGHT']);
+var isUpPressed = game.keyDown('UP');
+var isArrowPressed = game.keyDown(['UP', 'DOWN', 'LEFT', 'RIGHT']);
 
-input.on('key', 'A', function(key) {
+game.on('key', 'A', function(key) {
   // key === 'A'
 });
-input.on('key', ['A', 'B'], function(key) {
+game.on('key', ['A', 'B'], function(key) {
   ...
 });
 ```

@@ -29,11 +29,11 @@
    };
 
    Point.prototype.mult = function(other) {
-      return new Point(this.x * other.x, this.y * other.y);
+      return new Point(this.x * (other.x || other), this.y * (other.y || other));
    };
    
    Point.prototype.sub = function(other) {
-      return this.add(other.mult({ x: -1, y: -1 }));
+      return this.add(other.mult(-1));
    };
 
    Point.prototype.length = function(other) {
