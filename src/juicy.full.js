@@ -43,22 +43,24 @@
    /* ----------------------- Sounds ------------------------ */
    var Sounds = {};
 
-   var Sound = Juicy.Sound = function(name, src, options) {
+   var Sound = Juicy.Sound = function(name, src, loop) {
       if (typeof(src) !== 'string') {
          src = name;
-         options = src;
+         loop = src;
       }
 
       this.name = src;
-      this.options = options || {};
 
       if (!Sounds[name]) {
-         Sound.load(name, src);
+         Sound.load(name, src, loop);
       }
    };
 
-   Sound.load = function(name, src) {
+   Sound.load = function(name, src, loop) {
       var sound  = Sounds[name] = document.createElement('audio');
+      if (loop) {
+         sound.loop = "loop";
+      }
       var source = document.createElement("source");
       source.src = src;
       sound.appendChild(source);
@@ -651,4 +653,53 @@
          context.globalAlpha = originalAlpha;
       }
    });
+
+   /* ------------------------------------------------------- */
+   /* -------------------        NOTE        ---------------- */
+   /* ------------------------------------------------------- */
+   /* -------------------                    ---------------- */
+   /* -------------------  All of the above  ---------------- */
+   /* ------------------- are in juicy lite. ---------------- */
+   /* ------------------- Here comes the new ---------------- */
+   /* -------------------       stuff.       ---------------- */
+   /* -------------------                    ---------------- */
+   /* ------------------------------------------------------- */
+
+   /* -------------------- Helper functions ----------------- */
+   /*
+    * Juicy.rand([min, ] max) - Return a random int between [min, max)
+    */
+   Juicy.rand = function(min, max) {
+      if (max)
+         return Math.floor(Math.random() * (max - min)) + min;
+      else
+         return Math.floor(Math.random() * min);
+   };
+
+   Juicy.PI = Math.PI;
+
+   /* ----------------- Entity helper functions -------------- */
+   Entity.prototype.contains = function(point) {
+      point = point.sub(this.position);
+      return point.x >= 0          && point.y >= 0 && 
+             point.x <= this.width && point.y <= this.height;
+   };
+
+   Entity.prototype.distance = function(other) {
+      if (!other.x)
+         other = other.position; // Make sure it's a Point
+
+      return this.position.sub(other).length();
+   };
+
+   Entity.prototype.testCollision = function(other) {
+      var otherBottomRight = other.position.add(new Point(other.width, other.height));
+      var bottomRight      = this .position.add(new Point(this .width, this .height));
+
+      return otherBottomRight.x >= this.position.x &&
+             otherBottomRight.y >= this.position.y &&
+             other.position.x   <= bottomRight.x   &&
+             other.position.y   <= bottomRight.y;
+   };
+
 })(window, document);

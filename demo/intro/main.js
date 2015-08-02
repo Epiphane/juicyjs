@@ -1,5 +1,5 @@
 // function(Juicy) {
-   var Game = Juicy.Game.init(document.getElementById('game-canvas'), 1024, 768, {
+   Juicy.Game.init(document.getElementById('game-canvas'), 1024, 768, {
       LEFT: 37,
       UP: 38,
       RIGHT: 39,

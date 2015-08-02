@@ -90,7 +90,7 @@ var GameScreen = Juicy.State.extend({
       });
 
       // Load jump sound
-      Juicy.Sound.load('jump', 'fx_jump.wav');
+      Juicy.Sound.load('jump', 'fx_jump.mp3');
    },
 
    key_UP: function() {
