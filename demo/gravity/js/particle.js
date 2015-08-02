@@ -5,8 +5,8 @@ Juicy.Component.create('Particle', {
 
         this.mass = 2;
 
-        entity.transform.position.x = Juicy.rand(800);
-        entity.transform.position.y = Juicy.rand(600);
+        entity.position.x = Juicy.rand(800);
+        entity.position.y = Juicy.rand(600);
 
         var INITIAL_SPEED = 100;
         this.speed.x = (Math.random() - 0.5) * INITIAL_SPEED;
@@ -27,8 +27,8 @@ Juicy.Component.create('Particle', {
             }
 
             this.gravitate(dt, 
-                points[i].transform.position.x - this.entity.transform.position.x, 
-                points[i].transform.position.y - this.entity.transform.position.y, 
+                points[i].position.x - this.entity.position.x, 
+                points[i].position.y - this.entity.position.y, 
                 points[i].getComponent('GravityPoint').mass);
         }
 
@@ -37,9 +37,9 @@ Juicy.Component.create('Particle', {
             this.speed = this.speed.normalize(MAX_SPEED);
         }
 
-        this.last = this.entity.transform.position;
-        this.entity.transform.position.x += this.speed.x * dt;
-        this.entity.transform.position.y += this.speed.y * dt;
+        this.last = this.entity.position;
+        this.entity.position.x += this.speed.x * dt;
+        this.entity.position.y += this.speed.y * dt;
     },
     render: function(context) {
         context.fillStyle = context.strokeStyle = '#ffffff';

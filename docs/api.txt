@@ -2,13 +2,15 @@ JuicyJS Api Reference
 
 In sweet TXT form!
 
+Singletons:
+   Game
+
 Classes:
-  Game
-  Input
-  State
-  Text
-  Entity
-  Component
+   Point
+   State
+   Text
+   Entity
+   Component
 
 Global Components:
    Transform
@@ -25,18 +27,13 @@ Static methods:
 -----------------------------
 
 Game:
-   new Juicy.Game(canvas, width, height)
+   Juicy.Game.init(canvas, width, height, input_keys)
       Initialize a new Game
       > canvas [DOM] : DOM element of the canvas for this game
       > width [number] : width of the game
       > height [number] : height of the game
-
-Static methods:
-   Game.extend(properties, static_properties)
-      Return a modified Game object, with properties possibly overriden
-      > properties [object] : member functions of the new Game object
-      > static_properties [object] : static functions of the new Game object
-      < modified Juicy.Game constructor
+      > input_keys [object] : map from Key NAME to keyCode
+      < chain
 
 Member functions:
    setInput(input)
@@ -58,40 +55,12 @@ Member functions:
       > state [Juicy.State] : state to register
       < chain
 
-   click(x, y)
-      React to a click on the canvas
-      > x [number] : x position of click in game
-      > y [number] : y position of click in game
-      < chain
-
    run()
       Begin the game's update loop
       < chain
 
    pause()
       Pause the game and kill its update loop. You must use run() to start it again
-      < chain
-
------------------------------
-
-Input:
-   new Juicy.Input(document, keys, controls)
-      Initialize a new Game
-      > document [document] : HTML5 document to attach events to
-      > keys [object] : Association from control name to keyCode
-      > controls [any] : Totally useless. 100%
-
-Static methods:
-   Input.extend(properties, static_properties)
-      Return a modified Input object, with properties possibly overriden
-      > properties [object] : member functions of the new Input object
-      > static_properties [object] : static functions of the new Input object
-      < modified Juicy.Input constructor
-
-Member functions:
-   setKeys(keys)
-      Change the key bindings
-      > keys [object] : Association from control name to keyCode
       < chain
 
    keyDown(key)
@@ -111,12 +80,41 @@ Member functions:
 
 -----------------------------
 
+Point:
+   new Juicy.Point()
+      Initializes a point at {0, 0}
+   new Juicy.Point(value)
+      Initializes a point at {value, value}
+      > value [number]
+   new Juicy.Point(x, y)
+      Initializes a point at {x, y}
+      > x [number]
+      > y [number]
+
+Member functions:
+   add(other)
+      Returns a new point with the sum of this and other
+      > other [Juicy.Point] : Point to add
+      < Juicy.Point
+
+   sub(other)
+      Returns a new point with the difference of this and other
+      > other [Juicy.Point] : Point to subtract
+      < Juicy.Point
+
+   mult(other)
+      Returns a new point with the sum of this and other
+      > other [number|Juicy.Point] : Point to multiply, or scalar
+      < Juicy.Point
+
+   length()
+      Returns the length of this point (as a vector)
+      < number
+
+-----------------------------
+
 State:
    new Juicy.State()
-      Initialize a new game state.
-   new Juicy.Scene()
-      Initialize a new game state.
-   new Juicy.Screen()
       Initialize a new game state.
 
 Static methods:
@@ -128,13 +126,28 @@ Static methods:
 
 Extendable member functions:
    init()
-      Called when the scene is activated.
+      Called when the state is activated.
       At this point, the state has a reference to its Game Object
 
-   click(x, y)
+   click(point)
       React to a click in the game
-      > x [number] : x position of click in game
-      > y [number] : y position of click in game
+      > point [Juicy.Point] : point that was clicked
+
+   dragstart(point)
+      Called when the user begins dragging on the canvas
+      > point [Juicy.Point] : point they began dragging
+
+   drag(point)
+      Called when the user drags on the canvas
+      > point [Juicy.Point] : point they left the canvas
+
+   dragend(point)
+      Called when the user is done dragging on the canvas
+      > point [Juicy.Point] : point they left the canvas
+
+   key_{CONTROL}(keyCode)
+      Called when the key named CONTROL is pressed
+      > keyCode [number] : code of the key pressed
 
    update(dt, input)
       Update the state, called once per virtual frame

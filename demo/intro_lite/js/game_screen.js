@@ -22,8 +22,7 @@ var GameScreen = Juicy.State.extend({
 
       // This is virtually the same, as an example of a custom entity
       this.dude = new Dude(this);
-      this.dude.position.x = 10;
-      this.dude.position.y = 10;
+      this.dude.position = new Juicy.Point(10);
 
       // Of course you can change that color;
       this.dude.getComponent('Box').fillStyle = 'green';
@@ -96,8 +95,8 @@ var GameScreen = Juicy.State.extend({
 
    // click is called whenever the scene gets clicked on
    // x and y are always scaled, so they will be from [0, GAME_WIDTH] and [0, GAME_HEIGHT]
-   click: function(x, y) {
-      console.log(x, y);
+   click: function(point) {
+      console.log(point);
    },
 
 

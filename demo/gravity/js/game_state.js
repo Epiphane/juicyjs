@@ -2,7 +2,7 @@ var GameState = Juicy.State.extend({
    constructor: function() {
       // Create credit tag
       this.credit = new Juicy.Entity(this, ['Text']);
-      this.credit.transform.position.y = 586;
+      this.credit.position.y = 586;
       var text = this.credit.getComponent('Text');
       text.set({ 
          text: 'Credit to codepen.io/akm2/full/rHIsa',
@@ -23,39 +23,30 @@ var GameState = Juicy.State.extend({
       this.canv.height = 600;
       this.ctx = this.canv.getContext('2d');
    },
-   click: function(x, y) {
-      if (this.credit.transform.contains(x, y)) {
+   click: function(point) {
+      if (this.credit.contains(point)) {
          window.open('http://codepen.io/akm2/full/rHIsa', '_blank');
       }
       else {
          var gPoint = new Juicy.Entity(this, ['GravityPoint']);
-         gPoint.transform.position.x = x;
-         gPoint.transform.position.y = y;
+         gPoint.position = point;
          this.gravityPoints.push(gPoint);
       }
    },
-   drag: function(x, y) {
+   drag: function(point) {
       if (this.dragging) {
-         this.dragging.point.position.x = x - this.dragging.offset.x;
-         this.dragging.point.position.y = y - this.dragging.offset.y;
+         this.dragging.point.position = point.sub(this.dragging.offset);
       }
    },
-   dragstart: function(x, y) {
+   dragstart: function(point) {
       for (var i = 0; i < this.gravityPoints.length; i ++) {
-         var point = this.gravityPoints[i].getComponent('GravityPoint');
-         var dx = x - this.gravityPoints[i].transform.position.x;
-         var dy = y - this.gravityPoints[i].transform.position.y;
-         if (Math.sqrt(dx * dx + dy * dy) < point.radius) {
+         var gravityPoint = this.gravityPoints[i].getComponent('GravityPoint');
+         var dist = point.sub(this.gravityPoints[i].position);
+         if (dist.length() < gravityPoint.radius) {
             this.dragging = {
-               point: this.gravityPoints[i].transform,
-               start: {
-                  x: x,
-                  y: y
-               },
-               offset: {
-                  x: dx,
-                  y: dy
-               }
+               point: this.gravityPoints[i],
+               start: point,
+               offset: dist
             };
          }
       }

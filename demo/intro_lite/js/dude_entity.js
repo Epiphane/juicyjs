@@ -10,8 +10,7 @@ var Dude = Juicy.Entity.extend({
       // I CAN DO WHATEVER I WANT
       // I'M TIRED OF WRITING DOCS
       // ENJOY
-      this.width = 60;
-      this.height = 60;
+      this.width = this.height = 60;
 
       this.getComponent('Box').fillStyle = 'red';
    }
