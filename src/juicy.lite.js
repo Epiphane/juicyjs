@@ -40,6 +40,42 @@
       return Math.sqrt(this.x * this.x + this.y * this.y);
    };
 
+   /* ----------------------- Sounds ------------------------ */
+   var AudioContext = new (window.AudioContext || window.webkitAudioContext)();
+   var Sounds = {};
+
+   var Sound = Juicy.Sound = function(name, src, options) {
+      if (typeof(src) !== 'string') {
+         src = name;
+         options = src;
+      }
+
+      this.name = src;
+      this.options = options || {};
+
+      if (!Sounds[name]) {
+         Sound.load(name, src);
+      }
+   };
+
+   Sound.load = function(name, src) {
+      var sound  = Sounds[name] = document.createElement('audio');
+      var source = document.createElement("source");
+      source.src = src;
+      sound.appendChild(source);
+      sound.load();
+   };
+
+   Sound.play = Sound.prototype.play = function(name) {
+      name = this.name || name;
+      Sounds[name].play();
+   };
+
+   Sound.pause = Sound.prototype.pause = function(name) {
+      name = this.name || name;
+      Sounds[name].pause();
+   };
+
    /* -------------------- Game Handler --------------------- */
    /* 
     * init(canvas, width, height) - Construct new game
