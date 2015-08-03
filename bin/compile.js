@@ -3,15 +3,13 @@ var minify = require('./mangle');
 var util = require('./util');
 
 var configs = {};
+configs['juicy.full'] = ['juicy', 'juicy.util'];
 configs['juicy']      = ['juicy', 'juicy.util'];
 configs['juicy.lite'] = ['juicy'];
 
 var LIB = 'lib';
 function compileJS(destination, scripts, cb) {
    console.log('Compiling ' + destination);
-
-   util.rmdir(LIB);
-   fs.mkdirSync(LIB);
 
    var js = [];
    var jsFilesLoading = scripts.length;
@@ -42,8 +40,6 @@ function compileAndSave(destination, js, cb) {
    console.log('   ' + destination + '.js:' + xtra + js.length + ' bytes\t(' + (js.length / 1024).toFixed(2) + ' KB)');
    fs.writeFile(LIB + '/' + destination + '.js', js, function(err) {
       if (err) throw err;
-
-      cb();
    });
 
    js = minify.Juicy(js);
@@ -70,10 +66,13 @@ function next() {
    if (keys.length > 0) {
       var key = keys[0];
       compileJS(key, configs[key], function() {
+         delete configs[key];
       
          next();
       });
-      delete configs[key];
    }
 }
+
+util.rmdir(LIB);
+fs.mkdirSync(LIB);
 next();

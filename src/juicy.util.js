@@ -1,4 +1,4 @@
-(function(Juicy) {
+(function(Juicy, Entity) {
    /* -------------------- Helper functions ----------------- */
    /*
     * Juicy.rand([min, ] max) - Return a random int between [min, max)
@@ -35,4 +35,4 @@
              other.position.x   <= bottomRight.x   &&
              other.position.y   <= bottomRight.y;
    };
-})(Juicy);
+})(Juicy, Juicy.Entity);
