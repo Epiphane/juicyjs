@@ -35,4 +35,4 @@
              other.position.x   <= bottomRight.x   &&
              other.position.y   <= bottomRight.y;
    };
-})(Juicy, Juicy.Entity);
+})(window.Juicy, Juicy.Entity);
