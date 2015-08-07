@@ -1,254 +1,184 @@
-<h1>JuicyJS Api Reference</h1>
-<sub>In sweet TXT form!</sub>
+<html>
+<head>
+   <title>JuicyJS API</title>
 
-<h3>Classes:</h3>
-  Game
-  Input
-  State
-  Text
-  Entity
-  Component
+   <link href='http://fonts.googleapis.com/css?family=Open+Sans|Source+Code+Pro' rel='stylesheet' type='text/css'>
+   <!-- Latest compiled and minified CSS -->
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
-<h3>Global Components:</h3>
-   Transform
-   Image
-   Box
+   <!-- Optional theme -->
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+   <style type="text/css">
+   /*html, body {
+      background: #faf8ef;
+      font-family: 'Open Sans', sans-serif;
+   }
 
-<h3>Static methods:</h3>
-   rand(min, max)
-      Return a random float between min and max
-      > min [number] : minimum value
-      > max [number] : maximum value (non-inclusive)
-      < random float in the range [min, max)
+   .container {
+      width: 800px;
+      margin: 0 auto;
+   }
 
-<hr />
+   #title, #subtitle {
+      text-align: center;
+   }
 
-<h2>Game:</2>
-   new Juicy.Game(canvas, width, height)
-      Initialize a new Game
-      > canvas [DOM] : DOM element of the canvas for this game
-      > width [number] : width of the game
-      > height [number] : height of the game
+   .juicy_class {
+      background: white;
+      border-radius: 10px;
+      margin: 5px 0;
+      box-shadow: 0 1px 1px #777;
+   }
 
-<h3>Static methods:</h3>
-   Game.extend(properties, static_properties)
-      Return a modified Game object, with properties possibly overriden
-      > properties [object] : member functions of the new Game object
-      > static_properties [object] : static functions of the new Game object
-      < modified Juicy.Game constructor
+   .class_name {
+      text-align: center;
+      line-height: 3;
+      margin-bottom: 2px;
+   }
 
-<h3>Member functions:</h3>
-   setInput(input)
-      Attach an input handler to this game
-      > input [Juicy.Input] : object that will handle input
-      < chain
+   .field, .method {
+      padding: 1px 10px;
+      margin-bottom: 3px;
+      position: relative;
 
-   setCanvas(canvas)
-      Set the canvas that this game sits on
-      > canvas [DOM] : DOM canvas element
-      < chain
+      box-shadow: 0px 1px 1px #aaa;
+   }
 
-   resize()
-      Resize the canvas to maintain proper aspect ratio
-      < chain
+   .juicy_class div:last-child .method:last-child {
+      border-radius: 0 0 10px 10px;
+   }
 
-   setState(state)
-      Set the current running state for this game
-      > state [Juicy.State] : state to register
-      < chain
+   .method .top-right {
+      position: absolute;
+      top: 0;
+      right: 0;
 
-   click(x, y)
-      React to a click on the canvas
-      > x [number] : x position of click in game
-      > y [number] : y position of click in game
-      < chain
+      font-size: 12px;
 
-   run()
-      Begin the game's update loop
-      < chain
+      border-bottom-left-radius: 10px;
+      border-left: 1px solid #aaa;
+      border-bottom: 1px solid #aaa;
+      padding: 3px;
+   }
 
-   pause()
-      Pause the game and kill its update loop. You must use run() to start it again
-      < chain
+   .method.static {
+      background: #dff0d8;
+   }
 
-<hr />
+   .method.member {
+      background: #d9edf7;
+   }
 
-<h2>Input:</2>
-   new Juicy.Input(document, keys, controls)
-      Initialize a new Game
-      > document [document] : HTML5 document to attach events to
-      > keys [object] : Association from control name to keyCode
-      > controls [any] : Totally useless. 100%
+   .method h4 {
+      margin: 0;
+      margin-top: 5px;
+      font-size: 24px;
+   }
 
-<h3>Static methods:</h3>
-   Input.extend(properties, static_properties)
-      Return a modified Input object, with properties possibly overriden
-      > properties [object] : member functions of the new Input object
-      > static_properties [object] : static functions of the new Input object
-      < modified Juicy.Input constructor
+   .method .description {
+      font-size: 12px;
+   }
 
-<h3>Member functions:</h3>
-   setKeys(keys)
-      Change the key bindings
-      > keys [object] : Association from control name to keyCode
-      < chain
+   .field {
+      background: #f2dede;
 
-   keyDown(key)
-      Determine whether a specific key is down
-      > key [string|number] : key name or key code
-      < boolean
+      width: 177px;
+      margin-right: 4px; 
+      display: inline-block;
+   }
 
-   init(document)
-      Called during construction. Attach events to DOM
-      > document [document] : where to attach the elements
-      < chain
+   .field:nth-child(4n) {
+      margin-right: 0;
+   }
 
-   on(action, keys, callback)
-      Attach a callback to certain event
-      > action [string] : type of event (usually 'key')
-      > keys [string|array of strings|callback] : key names to attach to this callback OR callback (if action is not 'key') 
+   .field .name {
+      font-size: 22px;
+      display: block;
+   }
 
-<hr />
+   .field .type {
+      font-size: 10px;
+      margin: 5px;
+   }*/
+   </style>
+</head>
+<body>
+   <div class="container">
+      <h1 id="title"></h1>
+      <h6 id="subtitle"></h6>
 
-<h2>State:</2>
-   new Juicy.State()
-      Initialize a new game state.
-   new Juicy.Scene()
-      Initialize a new game state.
-   new Juicy.Screen()
-      Initialize a new game state.
+      <div id="api">
+         <div id="classes"></div>
+      </div>
+   </div>
 
-<h3>Static methods:</h3>
-   State.extend(properties, static_properties)
-      Return a modified State object, with properties possibly overriden
-      > properties [object] : member functions of the new State object
-      > static_properties [object] : static functions of the new State object
-      < modified Juicy.State constructor
+   <script type="text/javascript" src="./api.js"></script>
+   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+   <script type="text/javascript">
+      $(document).ready(function() {
+         $('#title').text(window.api.title);
+         $('#subtitle').text(window.api.subtitle);
 
-<h3>Extendable member functions:</h3>
-   init()
-      Called when the scene is activated.
-      At this point, the state has a reference to its Game Object
+         var wrapper = $('#api');
+         var el_classes = wrapper.find('#classes');
 
-   click(x, y)
-      React to a click in the game
-      > x [number] : x position of click in game
-      > y [number] : y position of click in game
+         // Singletons first
+         var classes = window.api.classes;
+         for (var i in classes) {
+            var object = classes[i];
+            var constructor   = object.constructor || {};
+            var staticMethods = object['static']   || {};
+            var memberMethods = object['member']   || {};
+            var memberFields  = object['fields']   || {};
 
-   update(dt, input)
-      Update the state, called once per virtual frame
-      > dt [number] : Time, in seconds, since last frame
-      > input [Juicy.Input] : Input object with information about player input
+            var container = $('<div class="juicy_class"></div>');
+            container.append('<h2 class="class_name">' + object.name + '</h2>');
 
-   render(context)
-      Render objects to the screen
-      > context [CanvasRenderingContext2D] : Context to which state should be rendered
+            var static_methods = $('<div class="static_methods"></div>');
+            var member_methods = $('<div class="member_methods"></div>');
+            var member_fields  = $('<div class="member_fields"></div>');
 
-<hr />
+            var createMethod = function(name, obj) {
+               var method = $('<div class="method"></div>');
+               method.append('<h4>' + name + '</h4>');
+               method.append('<p class="description">' + obj.description + '</p>');
 
-<h2>Text:</2>
-   new Juicy.Text([text, [font, [fillStyle, [alignment]]]])
-      Initialize a new text object
-      > text [string] : text to draw
-      > font [string] : font to write the text in
-      > fillStyle [string] : color to draw the text
-      > alignment [string] : left, center, or right
+               if (obj.extendable) {
+                  method.append('<div class="top-right">Extendable</div>');
+               }
 
-<h3>Member functions:</h3>
-   set(config)
-      Set the text, font, or fillStyle for this text
-      > config [object] : object with properties to set
-      < chain
+               return method;
+            }
 
-   align(alignment)
-      Set the alignment for this text
-      > alignment [string] : left, center, or right
+            for (var key in staticMethods) {
+               var method = createMethod(key, staticMethods[key]);
+               method.addClass('static');
+               static_methods.append(method);
+            }
+            for (var key in memberMethods) {
+               var method = createMethod(key, memberMethods[key]);
+               method.addClass('member');
+               member_methods.append(method);
+            }
+            for (var key in memberFields) {
+               var field = $('<div class="field"></div>');
+               field.append('<span class="name">' + key + '</span>');
+               field.append('<p class="type">' + memberFields[key] + '</p>');
+               member_fields.append(field);
+            }
 
-   render()
-      Re-render the text to its buffer. Not usually called.
-      < chain
-
-   draw(context, [sx, sy, swidth, sheight,] dx, dy, [dwidth, dheight])
-      Draw the text onto a 2d context
-      > context [CanvasRenderingContext2D] : Context to which text should be rendered
-      > sx [number] : source x value (from context.drawImage)
-      > sy [number] : source y value (from context.drawImage)
-      > swidth [number] : source width (from context.drawImage)
-      > sheight [number] : source height (from context.drawImage)
-      > dx [number] : dest x value (from context.drawImage)
-      > dy [number] : dest y value (from context.drawImage)
-      > dwidth [number] : dest width (from context.drawImage)
-      > dheight [number] : dest height (from context.drawImage)
-
-<hr />
-
-<h2>Entity:</2>
-   new Juicy.Entity(state, components)
-      Initialize a new entity
-      > state [Juicy.State] : state to which entity should be attached
-      > components [array of {string | Juicy.Component}] : components to initialize on the Entity
-
-<h3>Static methods:</h3>
-   Entity.extend(properties, static_properties)
-      Return a modified Entity object, with properties possibly overriden
-      > properties : member functions of the new Entity object
-      > static_properties : static functions of the new Entity object
-      < Modified Juicy.Entity constructor
-
-<h3>Member functions:</h3>
-   getComponent(name)
-      Return a component, if it exists, attached to the Entity
-      > name [string] : Name the component is registered under
-      < Juicy.Component object or undefined
-
-   addComponent(component)
-      Add a component to this entity
-      > component [string|Juicy.Component|Constructor] : component to add
-
-   update(dt)
-      Update all of this Entity's components
-      > dt [number] : time since last frame
-
-   render(context)
-      Render an entity to the screen
-      > context [CanvasRenderingContext2D] : Context to which entity should be rendered
-
-<h3>Extendable member functions:</h3>
-   init()
-      Called once the Entity's components have been initialized, so that you can mess with them at will.
-
-<hr />
-
-<h2>Component:</2>
-   new Juicy.Component(entity)
-      Initialize a new game state.
-      > entity [Juicy.Entity] : Entity this component belongs to
-
-<h3>Static methods:</h3>
-   Component.create(name, properties, static_properties)
-      Create a new Component and register it in the Juicy namespace
-      > name : name to register the new component as
-      > properties : member functions of the new Component object
-      > static_properties : static functions of the new Component object
-
-   Component.extend(properties, static_properties)
-      Return a modified Component object, with properties possibly overriden
-      > properties : member functions of the new Component object
-      > static_properties : static functions of the new Component object
-
-<h3>Extendable member functions:</h3>
-   update(dt, input)
-      Update this component
-      > dt [number] : time since last frame
-      > input [Juicy.Input] : input handler for the game
-
-   render(context)
-      Render this component to the screen
-      > context [CanvasRenderingContext2D] : Context to which entity should be rendered
-
-<hr />
-
-<h2>Global Components</2>
-   Box: Draws a rectangular bounding box around an Entity
-   Image: Draws a rectangular image
-   Transform: Maintains the position and size of the Entity. Created for every Entity
+            if (Object.keys(memberFields).length > 0) {
+               container.append(member_fields);
+            }
+            if (Object.keys(staticMethods).length > 0) {
+               container.append(static_methods);
+            }
+            if (Object.keys(memberMethods).length > 0) {
+               container.append(member_methods);
+            }
+            el_classes.append(container);
+         }
+      });
+   </script>
+</body>
+</html>

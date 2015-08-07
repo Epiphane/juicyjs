@@ -13,9 +13,9 @@ Classes:
    Component
 
 Global Components:
-   Transform
    Image
    Box
+   Text
 
 Static methods:
    rand(min, max)
@@ -227,9 +227,27 @@ Member functions:
       Render an entity to the screen
       > context [CanvasRenderingContext2D] : Context to which entity should be rendered
 
+   addChild(child)
+      Add a child to this entity, which will be rendered when its parent is
+      > child [Juicy.Entity] : entity that will be the child
+
+   globalPosition()
+      Get the global position of an Entity (world space)
+      < Juicy.Point
+
+   globalScale()
+      Get the global scale of an Entity (world space)
+      < Juicy.Point
+
 Extendable member functions:
    init()
       Called once the Entity's components have been initialized, so that you can mess with them at will.
+
+Properties:
+   position [Juicy.Point]
+   scale [Juicy.Point]
+   width [number]
+   height [number]
 
 -----------------------------
 
@@ -265,4 +283,4 @@ Extendable member functions:
 Global Components
    Box: Draws a rectangular bounding box around an Entity
    Image: Draws a rectangular image
-   Transform: Maintains the position and size of the Entity. Created for every Entity
+   Text: Draws text at the entity's position

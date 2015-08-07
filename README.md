@@ -5,7 +5,6 @@
 - [Game](#game)
 - [Input](#input)
 - [Scene](#scene-state-or-screen)
-- [Text](#text)
 - [Entity](#entity)
 - [Component](#component)
 - [Provided Components](#provided-components)
@@ -18,13 +17,12 @@ JuicyJS isn't a huge multi-platform, do-it-all game engine, and it won't be. Use
 
 ## Documentation
 
-When you include ```juicy.js```, a global variable ```Juicy``` is created. (If you use require, it is passed as a parameter. I'm not talking to you, I'm talking to everyone else.)
+When you include ```juicy.js```, a global variable ```Juicy``` is created.
 
 The ```Juicy``` namespace contains all the following:
 - [Game](#game)
 - [Input](#input)
 - [Scene](#scene-state-or-screen)
-- [Text](#text)
 - [Entity](#entity)
 - [Component](#component)
 - [Provided Components](#provided-components)
@@ -94,21 +92,6 @@ var myState = Juicy.State.extend({
 });
 ```
 
-### Text
-
-This is a special section dedicated to `Juicy.Text`. Usually rendering text is a nice thing, so Juicy makes it easy:
-
-```
-var myText = new Juicy.Text(text);
-var myText = new Juicy.Text(text, font);
-var myText = new Juicy.Text(text, font, color);
-var myText = new Juicy.Text(text, font, color, alignment);
-
-var example = new Juicy.Text('This is an example!', '40pt Arial', 'white', 'center');
-
-example.render(context, game_width / 2, 0); // Draw in the center of the screen
-```
-
 ### Entity
 
 `Juicy.Entity` is a wrapper for a specific object in a `Juicy.Scene`. It doesn't have to update, or even render, but it's a wrapper for `Juicy.Component`s.
@@ -127,6 +110,15 @@ var MyCustomEntity = Juicy.Entity.extend({
   }
 });
 ```
+
+Other parts of `Juicy.Entity` (previously `Juicy.Components.Transform`):
+  - `entity.contains(x, y)` - Is this point within the bounding box?
+  - `entity.position.x`
+  - `entity.position.y`
+  - `entity.scale.x`
+  - `entity.scale.y`
+  - `entity.width`
+  - `entity.height`
 
 ### Component
 
@@ -157,16 +149,6 @@ Juicy.Component.create('MyCustomComponent', {
 #### Provided Components
 
 ```Juicy``` comes with some default components. Here's what you can do out of the box:
-
-- `Transform`: a `Transform` comes attached to every Entity. It handles position & size.
-  - `entity.transform` is a good way to refer to this component
-  - `transform.contains(x, y)` - Is this point within the bounding box?
-  - `transform.position.x`
-  - `transform.position.y`
-  - `transform.scale.x`
-  - `transform.scale.y`
-  - `transform.width`
-  - `transform.height`
 - `Box`: Handles simple visual representation of an object's position and size
   - `box.fillStyle` - Color to fill box
   - `box.render(context, x, y, w, h)` - Usually called automatically, but just for reference
@@ -174,3 +156,7 @@ Juicy.Component.create('MyCustomComponent', {
   - `image.setImage(url)` - Load an image
   - `image.onload` - callback for when the image is ready
   - `image.render(context)`
+- `Text`: Attaches some text to the entity at the entity's anchor point (aka position)
+  - `text.set(config)` - Set the text, font, or fillStyle of some text
+  - `text.render(context)`
+
