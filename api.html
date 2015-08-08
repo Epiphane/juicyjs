@@ -1,0 +1,91 @@
+---
+layout: api
+title: JuicyJS
+---
+
+{% for class in site.data.api.classes %}
+  <div id="{{ class.name }}" class="class card">
+    <span class="name">{{ class.name }}</span>
+  
+    {% for field in class.fields %}
+      <code>{{ field[0] }} : {{ field[1] }}</code><br />
+    {% endfor %}
+  </div>
+  
+  {% if class.constructor %}
+    <div id="{{ class.name }}-constructor" class="constructor card">
+      <span class="name">Constructor</span>
+      <p><code classs="code">
+        new Juicy.{{ class.name }}(
+        {% for param in class.constructor.parameters %}
+          {% if param.optional == true %} [ {% endif %}
+          {{ param.type }}
+          {{ param.name }}{% if param.default %}
+            = {{ param.default }}
+          {% endif %}{% if forloop.last == false %},
+          {% endif %}
+          {% if param.optional == true %} ] {% endif %}
+        {% endfor %}
+      )
+      </code></p>
+      <div class="card">
+        {% for param in class.constructor.parameters %}
+        <code class="green">{{ param.name }}
+          {% if param.default %}
+            = {{ param.default }}
+          {% endif %}
+           : {{ param.type }}</code>
+        {% if param.optional == true %} (optional) {% endif %}
+        {{ param.description }}
+        <br />
+        {% endfor %}
+        </div>
+    </div>
+  {% endif %}
+  {% for method in class.methods %}
+    <div id="{{ class.name}}-{{ method[0] }}" class="static method card">
+      <span class="name">{{ method[0] }}( )</span>
+      <p class="description">{{ method[1].description }}</p>
+      <p><code classs="code">
+        {% if method[1].return == "chain" %}
+          Juicy.{{ class.name }}
+        {% else %}
+          {{ method[1].return }}
+        {% endif %}
+
+        {{ method[0] }}(
+        {% for param in method[1].parameters %}
+          {% if param.optional == true %} [ {% endif %}
+          {{ param.type }}
+          {{ param.name }}{% if param.default %}
+            = {{ param.default }}
+          {% endif %}{% if forloop.last == false %},
+          {% endif %}
+          {% if param.optional == true %} ] {% endif %}
+        {% endfor %}
+      )
+      </code></p>
+      <div class="card">
+        {% for param in method[1].parameters %}
+        <code class="green">{{ param.name }}
+          {% if param.default %}
+            = {{ param.default }}
+          {% endif %}
+           : {{ param.type }}</code>
+        {% if param.optional == true %} (optional) {% endif %}
+        {{ param.description }}
+        <br />
+        {% endfor %}
+        {% if method[1].return %}
+          Returns <code class="red">
+          {% if method[1].return == "chain" %}
+            Juicy.{{ class.name }}
+          {% else %}
+            {{ method[1].return }}
+          {% endif %}
+          </code>
+        {% endif %}
+        </div>
+    </div>
+  {% endfor %}
+{% endfor %}

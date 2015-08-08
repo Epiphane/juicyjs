@@ -1,0 +1,36 @@
+{% include head.html %}
+
+<!-- Custom sidebar information -->
+<ul class="api-quick-links">
+{% for class in site.data.api.classes %}
+  <li><a href="#{{ class.name }}" class="{{ class.name }}">{{ class.name }}</a></li>
+  <ul class="api-sub-links {{ class.name }}">
+    {% if class.constructor %}
+      <li><a href="#{{ class.name}}-constructor">Constructor</a></li>
+    {% endif %}
+    {% for method in class.methods %}
+      <li><a href="#{{ class.name}}-{{ method[0] }}">{{ method[0] }}</a></li>
+    {% endfor %}
+  </ul>
+{% endfor %}
+</ul>
+
+<script type="text/javascript">
+$('.api-quick-links > li > a').click(function() {
+  var quicklinks = $('.api-sub-links');
+  var selected = $(this).attr('class');
+
+  var thislink = quicklinks.filter('.' + selected);
+  if (!thislink.is(':visible')) {
+    quicklinks.filter(':not(.' + selected + ')').slideUp();
+    quicklinks.filter('.' + selected).slideDown();
+  }
+  else {
+    quicklinks.filter('.' + selected).slideUp();
+  }
+
+  return false;
+});
+</script>
+
+{% include foot.html %}
