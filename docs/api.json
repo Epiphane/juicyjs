@@ -1,46 +1,8 @@
 {
-   "title": "JuicyJS Api Reference",
-   "subtitle": "In sweet TXT form!",
-   "common": {
-      "extend": {
-         "description": "Return an extended class, with specified properties added or overridden",
-         "parameters": [
-            {
-               "name": "properties",
-               "type": "object",
-               "description": "Member functions of the new class"
-            },
-            {
-               "name": "static_properties",
-               "type": "object",
-               "description": "Static functions of the new class"
-            }
-         ]
-      },
-      "point_event": {
-         "name": "point",
-         "type": "Juicy.Point",
-         "description": "Location of event"
-      },
-      "context": {
-         "name": "context",
-         "type": "CanvasRenderingContext2D",
-         "description": "Rendering context to render on"
-      },
-      "dt": {
-         "name": "dt",
-         "type": "number",
-         "description": "Time (in seconds) since last frame"
-      },
-      "render": {
-         "description": "Render this object.",
-         "parameters": [ "common.context" ],
-         "extendable": true
-      }
-   },
-   "singletons": {
-      "Game": {
-         "static": {
+   "classes": [
+      {
+         "name": "Game",
+         "methods": {
             "init": {
                "description": "Initialize the Juicy Game",
                "parameters": [
@@ -65,10 +27,9 @@
                      "description": "Object mapping key name to key code"
                   }
                ],
+               "static": true,
                "return": "chain"
-            }
-         }, // Static Functions
-         "member": {
+            },
             "setCanvas": {
                "description": "Set the Canvas element the game renders to.",
                "parameters": [
@@ -108,7 +69,7 @@
                "parameters": [
                   {
                      "name": "key",
-                     "type": ["string", "number"],
+                     "type": "string|number",
                      "description": "Key name or key code"
                   }
                ],
@@ -124,30 +85,29 @@
                   },
                   {
                      "name": "keys",
-                     "type": ["string", "array of strings"],
+                     "type": "string|array of strings",
                      "description": "Key names to attach to this callback",
                      "optional": true
                   },
                   {
                      "name": "callback",
-                     "type": "function (string => ?) or (Event => ?)",
+                     "type": "function",
                      "description": "Function to call on event"
                   }
                ],
                "return": "chain"
             }
-         } // Member Functions
-      } // Game
-   }, // singletons
-   "classes": {
-      "Point": {
+         } 
+      }, 
+      {
+         "name": "Point",
          "constructor": {
             "parameters": [
                {
                   "name": "x",
                   "type": "number",
                   "description": "x value to initialize point at",
-                  "default": 0
+                  "default": 0,
                },
                {
                   "name": "y",
@@ -156,11 +116,11 @@
                   "default": "x"
                }
             ]
-         }, // Constructor
+         }, 
          "fields": {
             "x": "number",
             "y": "number"
-         }, // Fields
+         }, 
          "member": {
             "add": {
                "description": "Returns a new point with the sum of this and other",
@@ -199,16 +159,30 @@
                "description": "Returns the length of this point as a vector",
                "return": "number"
             }
-         } // Member Functions
-      }, // Point
-      "State": {
+         } 
+      }, 
+      {
+         "name": "State",
          "constructor": {
             "parameters": []
          },
-         "static": {
-            "extend": "common.extend",
-         }, // Static Functions
-         "member": {
+         "methods": {
+            "extend": {
+               "description": "Return an extended class, with specified properties added or overridden",
+               "parameters": [
+                  {
+                     "name": "properties",
+                     "type": "object",
+                     "description": "Member functions of the new class"
+                  },
+                  {
+                     "name": "static_properties",
+                     "type": "object",
+                     "description": "Static functions of the new class"
+                  }
+               ],
+               "static": true
+            },
             "init": {
                "description": "Called whenever the game changes to this state e.g. Juicy.Game.setState(this)",
                "parameters": [
@@ -222,22 +196,38 @@
             },
             "click": {
                "description": "Register a click in the game",
-               "parameters": [ "common.point_event" ],
+               "parameters": [ {
+                  "name": "point",
+                  "type": "Juicy.Point",
+                  "description": "Location of event"
+               } ],
                "extendable": true
             },
             "dragstart": {
                "description": "Register the beginning of a user drag event (mouse down)",
-               "parameters": [ "common.point_event" ],
+               "parameters": [ {
+                  "name": "point",
+                  "type": "Juicy.Point",
+                  "description": "Location of event"
+               } ],
                "extendable": true
             },
             "drag": {
                "description": "Register a drag event in the game",
-               "parameters": [ "common.point_event" ],
+               "parameters": [ {
+                  "name": "point",
+                  "type": "Juicy.Point",
+                  "description": "Location of event"
+               } ],
                "extendable": true
             },
             "dragend": {
                "description": "Register when the user is done dragging (mouse up)",
-               "parameters": [ "common.point_event" ],
+               "parameters": [ {
+                  "name": "point",
+                  "type": "Juicy.Point",
+                  "description": "Location of event"
+               } ],
                "extendable": true
             },
             "key_{CONTROL}": {
@@ -254,7 +244,11 @@
             "update": {
                "description": "Update the state. Called by Juicy.Game once per frame",
                "parameters": [
-                  "common.dt"
+                  {
+                     "name": "dt",
+                     "type": "number",
+                     "description": "Time (in seconds) since last frame"
+                  },
                   {
                      "name": "game",
                      "type": "Juicy.Game",
@@ -263,10 +257,21 @@
                ],
                "extendable": true
             },
-            "render": "common.render"
-         } // Member functions
-      }, // State
-      "Entity": {
+            "render": {
+               "description": "Render this object.",
+               "parameters": [ 
+                  {
+                     "name": "context",
+                     "type": "CanvasRenderingContext2D",
+                     "description": "Rendering context to render on"
+                  } 
+               ],
+               "extendable": true
+            }
+         } 
+      }, 
+      {
+         "name": "Entity",
          "constructor": {
             "parameters": [
                {
@@ -280,26 +285,52 @@
                   "description": "Components to initialize for this Entity"
                }
             ]
-         }, // Constructor
+         }, 
          "fields": {
             "position": "Juicy.Point",
             "scale": "Juicy.Point",
             "width": "number",
             "height": "number"
-         }, // Fields
-         "static": {
-            "extend": "common.extend",
-         }, // Static Functions
-         "member": {
+         }, 
+         "methods": {
+            "extend": {
+               "description": "Return an extended class, with specified properties added or overridden",
+               "parameters": [
+                  {
+                     "name": "properties",
+                     "type": "object",
+                     "description": "Member functions of the new class"
+                  },
+                  {
+                     "name": "static_properties",
+                     "type": "object",
+                     "description": "Static functions of the new class"
+                  }
+               ],
+               "static": true
+            },
             "init": {
                "description": "Called once the Entity's components have been initialized, so that you can mess with them at will.",
                "extendable": true
             },
             "update": {
                "description": "Update the Entity. Updates all components as needed.",
-               "parameters": [ "common.dt" ],
+               "parameters": [ {
+                  "name": "dt",
+                  "type": "number",
+                  "description": "Time (in seconds) since last frame"
+               } ],
             },
-            "render": "common.render",
+            "render": {
+               "description": "Render this object.",
+               "parameters": [ 
+                  {
+                     "name": "context",
+                     "type": "CanvasRenderingContext2D",
+                     "description": "Rendering context to render on"
+                  } 
+               ],
+            },
             "getComponent": {
                "description": "Return a component, if it exists",
                "parameters": [
@@ -316,7 +347,7 @@
                "parameters": [
                   {
                      "name": "component",
-                     "type": ["string", "Juicy.Component", "Constructor"],
+                     "type": "string|Juicy.Component|Constructor",
                      "description": "Component to add"
                   }
                ]
@@ -339,9 +370,10 @@
                "description": "Get the scale of this in world space",
                "return": "Juicy.Point"
             }
-         } // Member functions
-      }, // Entity
-      "Component": {
+         } 
+      }, 
+      {
+         "name": "Component",
          "constructor": {
             "parameters": [
                {
@@ -350,9 +382,24 @@
                   "description": "Entity this component belongs to (later this.entity)"
                }
             ]
-         }, // Constructor
-         "static": {
-            "extend": "common.extend",
+         }, 
+         "method": {
+            "extend": {
+               "description": "Return an extended class, with specified properties added or overridden",
+               "parameters": [
+                  {
+                     "name": "properties",
+                     "type": "object",
+                     "description": "Member functions of the new class"
+                  },
+                  {
+                     "name": "static_properties",
+                     "type": "object",
+                     "description": "Static functions of the new class"
+                  }
+               ],
+               "static": true
+            },
             "create": {
                "description": "Call Juicy.Component.extend and register it in the Juicy.Components namespace",
                "parameters": [
@@ -371,23 +418,37 @@
                      "type": "object",
                      "description": "Static functions of the new class"
                   }
-               ]
-            }
-         }, // Static
-         "member": {
+               ],
+               "static": true
+            },
             "update": {
                "description": "Update this component",
                "parameters": [
-                  "common.dt",
+                  {
+                     "name": "dt",
+                     "type": "number",
+                     "description": "Time (in seconds) since last frame"
+                  },
                   {
                      "name": "game",
                      "type": "Juicy.Game",
                      "description": "Reference to current game (for input)"
                   }
-               ]
+               ],
+               "extendable": true
             },
-            "render": "common.render"
-         } // Member
+            "render": {
+               "description": "Render this object.",
+               "parameters": [ 
+                  {
+                     "name": "context",
+                     "type": "CanvasRenderingContext2D",
+                     "description": "Rendering context to render on"
+                  } 
+               ],
+               "extendable": true
+            }
+         } 
       }
-   } // classes
+   ] 
 }
