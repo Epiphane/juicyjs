@@ -1,4 +1,7 @@
 // function(Juicy) {
+   var sfx = new Juicy.SoundEffects();
+   sfx.load('jump', 'fx_jump.mp3');
+   
    Juicy.Game.init(document.getElementById('game-canvas'), 1024, 768, {
       LEFT: 37,
       UP: 38,

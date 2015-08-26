@@ -3,8 +3,8 @@ var minify = require('./mangle');
 var util = require('./util');
 
 var configs = {};
-configs['juicy.full'] = ['juicy', 'juicy.util'];
-configs['juicy']      = ['juicy', 'juicy.util'];
+configs['juicy.full'] = ['juicy', 'juicy.sound', 'juicy.util'];
+configs['juicy']      = ['juicy', 'juicy.sound', 'juicy.util'];
 configs['juicy.lite'] = ['juicy'];
 
 var LIB = 'lib';

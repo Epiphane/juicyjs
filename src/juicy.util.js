@@ -12,6 +12,12 @@
 
    Juicy.PI = Math.PI;
 
+   /* ----------------- Point helper function ---------------- */
+   Juicy.Point.prototype.normalize = function(len) {
+      len = len || 1;
+      return this.mult(len / this.length());
+   };
+
    /* ----------------- Entity helper functions -------------- */
    Entity.prototype.contains = function(point) {
       point = point.sub(this.position);

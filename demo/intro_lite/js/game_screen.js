@@ -87,10 +87,17 @@ var GameScreen = Juicy.State.extend({
          // our actual state variable
          self.myCustomFunction(key);
       });
+
+
+
+      // Load up a jump sound to play
+      this.jump = new Juicy.Sound('fx_jump.mp3');
    },
 
    key_UP: function() {
       console.log('up!');
+
+      this.jump.play();
    },
 
    // click is called whenever the scene gets clicked on
