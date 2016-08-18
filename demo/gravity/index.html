@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+   <title>Juicy Gravity</title>
+   <!-- <link rel="icon" type="image/GIF" href="res/favicon.ico"/> -->
+   <meta name="apple-mobile-web-app-capable" content="yes"/>
+   <meta name="full-screen" content="yes"/>
+   <meta name="screen-orientation" content="portrait"/>
+   <meta name="x5-fullscreen" content="true"/>
+   <meta name="360-fullscreen" content="true"/>
+
+   <link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+   <style>
+   /* following code make sure user won't see selection in the app */
+   body, canvas, div {
+      -moz-user-select: none;
+      -webkit-user-select: none;
+      -ms-user-select: none;
+      -khtml-user-select: none;
+      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+   }
+   /* default styles for body */
+   body, html {
+      padding:0;
+      margin: 0 auto;
+      background: #666;
+      width: 800px;
+      height: 600px;
+   }
+   canvas, #game-canvas {
+      background: rgba(11, 51, 56, 1);
+
+      width: 800px;
+      height: 600px;
+   }
+   </style>
+</head>
+<body>
+
+   <!-- Main stage for rendering game scenes -->
+   <canvas id="game-canvas"></canvas>
+
+   <!-- Libraries -->
+   <script src="../../lib/juicy.full.js"></script>
+
+   <!-- main.js loads everything it needs -->
+   <script src="js/vector.js"></script>
+   <script src="js/particle.js"></script>
+   <script src="js/gravity_point.js"></script>
+   <script src="js/game_state.js"></script>
+   <script src="main.js"></script>
+</body>
+</html>
